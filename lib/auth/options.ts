@@ -1,35 +1,88 @@
 import { NextAuthOptions } from "next-auth";
-import KeycloakProvider from "next-auth/providers/keycloak";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    KeycloakProvider({
-      clientId: process.env.KEYCLOAK_CLIENT_ID!,
-      clientSecret: process.env.KEYCLOAK_CLIENT_SECRET!,
-      issuer: process.env.KEYCLOAK_ISSUER,
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
+
+        try {
+          // Используем ту же логику, что и в route.ts, но без HTTP запроса
+          const params = new URLSearchParams({
+            grant_type: 'password',
+            client_id: process.env.KEYCLOAK_CLIENT_ID!,
+            client_secret: process.env.KEYCLOAK_CLIENT_SECRET!,
+            username: credentials.email,
+            password: credentials.password,
+          });
+
+          const response = await fetch(
+            `${process.env.KEYCLOAK_BASE_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/token`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: params,
+            }
+          );
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            console.error('Keycloak error:', data.error_description || 'Invalid credentials');
+            return null;
+          }
+
+          // Декодируем access_token чтобы получить информацию о пользователе
+          const tokenParts = data.access_token.split('.');
+          const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+
+          return {
+            id: payload.sub,
+            email: payload.email,
+            name: payload.name || payload.preferred_username || payload.email,
+            accessToken: data.access_token,
+            refreshToken: data.refresh_token,
+          };
+        } catch (error) {
+          console.error('Auth error:', error);
+          return null;
+        }
+      },
     }),
   ],
   callbacks: {
-    async jwt({ token, account }) {
-      // Persist the access_token to the token right after signin
-      if (account) {
-        token.accessToken = account.access_token;
-        token.refreshToken = account.refresh_token;
-        token.idToken = account.id_token;
+    async jwt({ token, user }) {
+      if (user) {
+        token.accessToken = user.accessToken;
+        token.refreshToken = user.refreshToken;
+        token.sub = user.id;
+        token.email = user.email;
+        token.name = user.name;
       }
       return token;
     },
     async session({ session, token }) {
-      // Send properties to the client
       session.accessToken = token.accessToken;
       session.refreshToken = token.refreshToken;
-      session.idToken = token.idToken;
+      if (session.user) {
+        session.user.id = token.sub;
+        session.user.email = token.email;
+        session.user.name = token.name;
+      }
       return session;
     },
   },
   pages: {
     signIn: "/login",
-    error: "/login", // Error code passed in query string as ?error=
+    error: "/login",
   },
   session: {
     strategy: "jwt",

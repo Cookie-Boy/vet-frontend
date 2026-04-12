@@ -17,6 +17,7 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|robots.txt|login|qr-scan).*)",
+    // Исключаем /register, /api/auth/* и статику
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|robots.txt|login|register|qr-scan).*)",
   ],
 };
