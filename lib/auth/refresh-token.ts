@@ -1,7 +1,38 @@
-// frontend/lib/auth/refresh-token.ts
-import { getSession, signOut } from "next-auth/react";
+// lib/auth/refresh-token.ts
+import { signOut } from "next-auth/react";
 
+// Новая функция: принимает refreshToken, возвращает новые токены
+export async function refreshTokenPair(refreshToken: string) {
+  const params = new URLSearchParams({
+    grant_type: 'refresh_token',
+    client_id: process.env.KEYCLOAK_CLIENT_ID!,
+    client_secret: process.env.KEYCLOAK_CLIENT_SECRET!,
+    refresh_token: refreshToken,
+  });
+
+  const response = await fetch(
+    `${process.env.KEYCLOAK_BASE_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/token`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params,
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to refresh token");
+  }
+
+  const data = await response.json();
+  return {
+    accessToken: data.access_token,
+    refreshToken: data.refresh_token,
+  };
+}
+
+// Оригинальная функция для клиента (использует сессию NextAuth)
 export async function refreshAccessToken() {
+  const { getSession } = await import("next-auth/react");
   const session = await getSession();
   
   if (!session?.refreshToken) {
@@ -9,40 +40,16 @@ export async function refreshAccessToken() {
   }
 
   try {
-    const params = new URLSearchParams({
-      grant_type: 'refresh_token',
-      client_id: process.env.KEYCLOAK_CLIENT_ID!,
-      client_secret: process.env.KEYCLOAK_CLIENT_SECRET!,
-      refresh_token: session.refreshToken,
-    });
-
-    const response = await fetch(
-      `${process.env.KEYCLOAK_BASE_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/token`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params,
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to refresh token");
-    }
-
-    const data = await response.json();
+    const newTokens = await refreshTokenPair(session.refreshToken);
     
-    // Обновляем токены в сессии NextAuth
-    // Это нужно сделать через специальный эндпоинт NextAuth
+    // Обновляем сессию на клиенте
     await fetch('/api/auth/session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        accessToken: data.access_token,
-        refreshToken: data.refresh_token,
-      }),
+      body: JSON.stringify(newTokens),
     });
 
-    return data.access_token;
+    return newTokens.accessToken;
   } catch (error) {
     console.error("Token refresh failed:", error);
     await signOut({ redirect: true, callbackUrl: "/login" });

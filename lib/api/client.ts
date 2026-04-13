@@ -1,8 +1,9 @@
 import axios from "axios";
 import { getSession, signOut } from "next-auth/react";
+import { refreshAccessToken } from "../auth/refresh-token";
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: process.env.API_URL_EXTERNAL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -27,10 +28,14 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      // Here we could try to refresh token, but Keycloak token refresh is handled by NextAuth automatically on session expiry.
-      // For simplicity, we just sign out and redirect to login.
-      await signOut({ redirect: false });
-      window.location.href = "/login";
+      try {
+        const newToken = await refreshAccessToken(); // из refresh-token.ts
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return apiClient(originalRequest);
+      } catch {
+        await signOut({ redirect: false });
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }

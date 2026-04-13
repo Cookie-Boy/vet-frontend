@@ -49,3 +49,27 @@ export async function getKeycloakAdminToken(): Promise<string> {
 
   return data.access_token;
 }
+
+export async function updateKeycloakUser(
+  userId: string,
+  updates: { firstName?: string; lastName?: string; email?: string }
+): Promise<void> {
+  const adminToken = await getKeycloakAdminToken();
+
+  const response = await fetch(
+    `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${process.env.KEYCLOAK_REALM}/users/${userId}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`,
+      },
+      body: JSON.stringify(updates),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to update Keycloak user: ${error}`);
+  }
+}
