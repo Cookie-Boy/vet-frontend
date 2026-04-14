@@ -1,7 +1,7 @@
 export interface VaccinationDto {
   name: string;
-  date: string; // ISO date
-  nextDueDate: string; // ISO date
+  date: string;
+  nextDueDate: string;
 }
 
 export interface MedicalRecordDto {
@@ -12,7 +12,7 @@ export interface MedicalRecordDto {
 
 export interface HomeInfoDto {
   alerting: boolean;
-  radius: number; // meters
+  radius: number;
   lat: number;
   lon: number;
 }
@@ -24,7 +24,8 @@ export interface CollarDto {
 
 export interface PetRequest {
   ownerId: string;
-  species: string;
+  name: string;
+  species: "cat" | "dog";
   age: number;
   breed: string;
   chipNumber?: string;
@@ -35,6 +36,7 @@ export interface PetRequest {
 export interface PetResponse {
   id: string;
   ownerId: string;
+  name: string;
   species: string;
   age: number;
   breed: string;

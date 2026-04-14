@@ -1,8 +1,27 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { isTokenExpired } from "./lib/auth/refresh-token";
 
 export default withAuth(
-  function middleware(req) {
+  async function middleware(req: NextRequest) {
+    const { getToken } = await import("next-auth/jwt");
+    const token = await getToken({ req });
+    
+    // Если токена нет — редирект на логин (обработает withAuth)
+    if (!token) {
+      return NextResponse.next();
+    }
+    
+    const accessToken = token.accessToken as string;
+    
+    // Если access token истёк — редиректим на /login
+    if (accessToken && isTokenExpired(accessToken)) {
+      const url = new URL('/login', req.url);
+      url.searchParams.set('callbackUrl', req.nextUrl.pathname);
+      return NextResponse.redirect(url);
+    }
+    
     return NextResponse.next();
   },
   {

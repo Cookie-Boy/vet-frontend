@@ -1,6 +1,16 @@
 // lib/auth/refresh-token.ts
 import { signOut } from "next-auth/react";
 
+export function isTokenExpired(accessToken: string): boolean {
+  try {
+    const payload = JSON.parse(Buffer.from(accessToken.split('.')[1], 'base64').toString());
+    const now = Math.floor(Date.now() / 1000);
+    return payload.exp < now;
+  } catch {
+    return true; // если не удалось распарсить — считаем истёкшим
+  }
+}
+
 // Новая функция: принимает refreshToken, возвращает новые токены
 export async function refreshTokenPair(refreshToken: string) {
   const params = new URLSearchParams({
