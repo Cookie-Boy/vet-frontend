@@ -40,9 +40,10 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
-          // Декодируем access_token чтобы получить информацию о пользователе
           const tokenParts = data.access_token.split('.');
           const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+          const roles = payload.realm_access?.roles || [];
+          const role = roles[0] || 'user'; // или маппинг ролей
 
           return {
             id: payload.sub,
@@ -50,6 +51,7 @@ export const authOptions: NextAuthOptions = {
             name: payload.name || payload.preferred_username || payload.email,
             accessToken: data.access_token,
             refreshToken: data.refresh_token,
+            role: role,
           };
         } catch (error) {
           console.error('Auth error:', error);
@@ -66,6 +68,7 @@ export const authOptions: NextAuthOptions = {
         token.sub = user.id;
         token.email = user.email;
         token.name = user.name;
+        token.role = user.role;
       }
       return token;
     },

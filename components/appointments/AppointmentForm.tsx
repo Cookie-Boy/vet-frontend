@@ -1,0 +1,242 @@
+// components/appointments/AppointmentForm.tsx
+"use client";
+
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
+import { CalendarIcon } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { PetResponse } from "@/types/pet";
+import { doctorsApi } from "@/lib/api/doctors";
+import { useAvailableSlots, useCreateAppointment } from "@/hooks/useAppointments";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { UUID } from "crypto";
+import { appointmentsApi } from "@/lib/api/appointments";
+import { useDoctors } from "@/hooks/useDoctors";
+
+const appointmentSchema = z.object({
+  petId: z.string().min(1, "Выберите питомца"),
+  doctorId: z.string().nullable(),
+  date: z.date(),
+  timeSlot: z.string().min(1, "Выберите время"),
+  comment: z.string().optional(),
+});
+
+type AppointmentFormValues = z.infer<typeof appointmentSchema>;
+
+interface AppointmentFormProps {
+  ownerId: string;
+  pets: PetResponse[];
+  preselectedDoctorId?: string;
+}
+
+export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: AppointmentFormProps) {
+  const router = useRouter();
+  const [selectedDoctor, setSelectedDoctor] = useState<string | null>(preselectedDoctorId || null);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  
+  // const doctors = await doctorsApi.client.getAll();
+  const { data: doctors } = useDoctors();
+  const createAppointment = useCreateAppointment();
+
+  const form = useForm<AppointmentFormValues>({
+    resolver: zodResolver(appointmentSchema),
+    defaultValues: {
+      petId: "",
+      doctorId: preselectedDoctorId || null,
+      date: new Date(),
+      timeSlot: "",
+      comment: "",
+    },
+  });
+
+  const doctorId = form.watch("doctorId");
+  const date = form.watch("date");
+  // const correctSlots = await appointmentsApi.server.getAvailableSlots(
+  //   doctorId === "any" ? null : doctorId,
+  //   date ? format(date, "yyyy-MM-dd") : ""
+  // );
+  const { data: correctSlots, isLoading: slotsLoading } = useAvailableSlots(
+    doctorId === "any" ? null : doctorId,
+    date ? format(date, "yyyy-MM-dd") : ""
+  );
+
+  const onSubmit = async (values: AppointmentFormValues) => {
+    if (!values.timeSlot) {
+      toast.error("Выберите время приёма");
+      return;
+    }
+
+    const [startTime, endTime] = values.timeSlot.split("|");
+    const selectedPet = pets.find(p => p.id === values.petId);
+    
+    const appointmentData = {
+      clinicId: "default", // временно
+      doctorId: values.doctorId === "any" ? null : values.doctorId,
+      patientId: values.petId,
+      startTime: startTime,
+      endTime: endTime,
+      metadata: {
+        comment: values.comment,
+        petName: selectedPet?.name,
+        ownerId: ownerId,
+      },
+    };
+
+    try {
+      await createAppointment.mutateAsync(appointmentData as any);
+      toast.success("Запись создана! Ожидайте подтверждения.");
+      router.push("/appointments");
+    } catch (error) {
+      toast.error("Не удалось создать запись. Попробуйте другое время.");
+    }
+  };
+
+  return (
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-2xl">
+      <Card>
+        <CardHeader>
+          <CardTitle>Выберите питомца</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Select onValueChange={(val) => form.setValue("petId", val as UUID)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Выберите питомца" />
+            </SelectTrigger>
+            <SelectContent>
+              {pets.map((pet) => (
+                <SelectItem key={pet.id} value={pet.id}>
+                  {pet.name} ({pet.species}, {pet.breed})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {form.formState.errors.petId && (
+            <p className="text-sm text-destructive mt-1">{form.formState.errors.petId.message}</p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Выберите врача</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Select
+            value={form.watch("doctorId") || "any"}
+            onValueChange={(val) => form.setValue("doctorId", val === "any" ? null : val)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Любой врач" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="any">Любой врач</SelectItem>
+              {doctors?.map((doc) => (
+                <SelectItem key={doc.id} value={doc.id}>
+                  {doc.lastName} {doc.firstName} – {doc.specialization}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Дата и время</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label>Дата приёма</Label>
+            <Popover>
+              <PopoverTrigger>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !date && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date ? format(date, "d MMMM yyyy", { locale: ru }) : "Выберите дату"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(d) => {
+                    form.setValue("date", d as Date);
+                    form.setValue("timeSlot", "");
+                  }}
+                  disabled={(d) => d < new Date() || d.getDay() === 0 || d.getDay() === 6} // пример: только будни
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {date && (
+            <div>
+              <Label>Доступное время</Label>
+              {slotsLoading ? (
+                <p className="text-sm text-muted-foreground">Загрузка...</p>
+              ) : correctSlots && correctSlots.length > 0 ? (
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  {correctSlots.map((slot) => (
+                    <Button
+                      key={`${slot.startTime}|${slot.endTime}`}
+                      type="button"
+                      variant={form.watch("timeSlot") === `${slot.startTime}|${slot.endTime}` ? "default" : "outline"}
+                      className="text-sm"
+                      onClick={() => form.setValue("timeSlot", `${slot.startTime}|${slot.endTime}`)}
+                    >
+                      {format(new Date(slot.startTime), "HH:mm")}
+                    </Button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Нет доступных слотов на выбранную дату</p>
+              )}
+              {form.formState.errors.timeSlot && (
+                <p className="text-sm text-destructive mt-1">{form.formState.errors.timeSlot.message}</p>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Дополнительно</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Label htmlFor="comment">Комментарий (необязательно)</Label>
+          <Textarea id="comment" {...form.register("comment")} rows={3} />
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end gap-4">
+        <Button type="button" variant="outline" onClick={() => router.back()}>
+          Отмена
+        </Button>
+        <Button type="submit" disabled={createAppointment.isPending}>
+          {createAppointment.isPending ? "Создание..." : "Записаться"}
+        </Button>
+      </div>
+    </form>
+  );
+}

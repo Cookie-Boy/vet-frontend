@@ -11,6 +11,8 @@ interface PetCardProps {
   pet: PetResponse;
 }
 
+// ??? Почему не отображается pet.name?
+
 export function PetCard({ pet }: PetCardProps) {
   return (
     <Card className="flex flex-col">

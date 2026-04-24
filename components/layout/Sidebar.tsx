@@ -1,3 +1,4 @@
+// components/layout/Sidebar.tsx
 "use client";
 
 import Link from "next/link";
@@ -16,19 +17,27 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-
-const navigation = [
-  { name: "Дашборд", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Питомцы", href: "/pets", icon: PawPrint },
-  { name: "Записи", href: "/appointments", icon: Calendar },
-  { name: "Врачи", href: "/doctors", icon: Stethoscope },
-  { name: "Лекарства", href: "/medications", icon: Pill },
-  { name: "Здоровье", href: "/health", icon: Activity },
-  { name: "Профиль", href: "/profile", icon: User },
-];
+import { useSession } from "next-auth/react";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  
+  const isAdmin = session?.user.role === "ADMIN";
+
+  const navigation = [
+    { name: "Дашборд", href: "/", icon: LayoutDashboard, alwaysShow: true },
+    { name: "Питомцы", href: "/pets", icon: PawPrint, alwaysShow: true },
+    { name: "Записи", href: "/appointments", icon: Calendar, alwaysShow: true },
+    { name: "Врачи", href: "/doctors", icon: Stethoscope, alwaysShow: true },
+    { name: "Лекарства", href: "/medications", icon: Pill, alwaysShow: false, requireAdmin: true },
+    { name: "Здоровье", href: "/health", icon: Activity, alwaysShow: true },
+    { name: "Профиль", href: "/profile", icon: User, alwaysShow: true },
+  ];
+
+  const filteredNavigation = navigation.filter(item => 
+    item.alwaysShow || (item.requireAdmin && isAdmin)
+  );
 
   return (
     <>
@@ -36,7 +45,7 @@ export default function Sidebar() {
       <aside className="fixed left-0 top-16 z-20 hidden h-[calc(100vh-4rem)] w-64 shrink-0 border-r bg-white lg:block">
         <nav className="flex h-full flex-col p-4">
           <div className="flex-1 space-y-1">
-            {navigation.map((item) => {
+            {filteredNavigation.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
               return (
                 <Link key={item.name} href={item.href}>
@@ -56,7 +65,7 @@ export default function Sidebar() {
           </div>
           <Separator className="my-4" />
           <div className="text-xs text-muted-foreground px-2">
-            Версия 1.0.1
+            Версия 1.0.0
           </div>
         </nav>
       </aside>
@@ -71,7 +80,7 @@ export default function Sidebar() {
         <SheetContent side="left" className="w-64 p-0 pt-10">
           <nav className="flex h-full flex-col p-4">
             <div className="flex-1 space-y-1">
-              {navigation.map((item) => {
+              {filteredNavigation.map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                 return (
                   <Link key={item.name} href={item.href}>
@@ -91,7 +100,7 @@ export default function Sidebar() {
             </div>
             <Separator className="my-4" />
             <div className="text-xs text-muted-foreground px-2">
-              Версия 1.0.1
+              Версия 1.0.0
             </div>
           </nav>
         </SheetContent>
