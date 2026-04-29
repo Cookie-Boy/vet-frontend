@@ -17,7 +17,11 @@ export default async function AppointmentsPage() {
     // Предположим, есть эндпоинт /api/appointment?ownerId=...
     let ownerId = session.user.id;
     appointments = await appointmentsApi.server.getAppointments(ownerId);
+    console.log("Got the appointments...");
+    console.log(appointments);
   } catch (error) {
+    console.log("Error cought");
+    console.log(error);
     appointments = [];
   }
 

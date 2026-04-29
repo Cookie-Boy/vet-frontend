@@ -3,7 +3,7 @@ import { getSession, signOut } from "next-auth/react";
 import { refreshAccessToken } from "../auth/refresh-token";
 
 const apiClient = axios.create({
-  baseURL: process.env.API_URL_EXTERNAL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     "Content-Type": "application/json",
   },

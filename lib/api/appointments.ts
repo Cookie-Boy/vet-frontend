@@ -4,8 +4,9 @@ import apiClient from "./client";
 import { createServerApiClient } from "./server-client";
 
 export interface AppointmentFilters {
-  patientId?: string;
   doctorId?: string;
+  ownerId?: string;
+  petId?: string;
   status?: "BOOKED" | "CANCELLED" | "COMPLETED";
   fromDate?: string;
   toDate?: string;
@@ -32,12 +33,8 @@ export const appointmentsApi = {
 
   // Клиентские методы
   client: {
-    getAppointments: async (filters: AppointmentFilters): Promise<AppointmentResponse[]> => {
-      const response = await apiClient.get("/api/appointment", { params: filters });
-      return response.data;
-    },
-    getByPatient: async (patientId: string): Promise<AppointmentResponse[]> => {
-      const response = await apiClient.get(`/api/appointment/patient/${patientId}`);
+    getAppointments: async (ownerId: string | undefined): Promise<AppointmentResponse[]> => {
+      const response = await apiClient.get(`/api/appointment/owner/${ownerId}`);
       return response.data;
     },
     create: async (data: AppointmentRequest): Promise<AppointmentResponse> => {

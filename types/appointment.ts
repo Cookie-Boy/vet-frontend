@@ -1,24 +1,24 @@
 export interface AppointmentRequest {
-  clinicId: string;
   doctorId: string;
-  patientId?: string;
+  ownerId: string;
+  petId: string;
   tgUserName?: string;
-  startTime: string; // ISO datetime
+  startTime: string;
   endTime: string;
   metadata?: Record<string, any>;
 }
 
 export interface AppointmentResponse {
   id: string;
-  clinicId: string;
-  clinicName?: string;
   doctorId: string;
   doctorFullName?: string;
-  patientId?: string;
-  patientFullName?: string;
+  ownerId: string;
+  ownerFullName?: string;
+  petId?: string;
+  petFullName?: string;
   startTime: string;
   endTime: string;
-  status: "BOOKED" | "CANCELLED" | "COMPLETED";
+  status: "PENDING" | "CANCELLED" | "CONFIRMED";
   createdAt: string;
   updatedAt: string;
   metadata?: Record<string, any>;

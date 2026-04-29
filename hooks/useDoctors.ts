@@ -6,7 +6,7 @@ import { DoctorRequest } from "@/types/doctor";
 export const useDoctors = () => {
   return useQuery({
     queryKey: ["doctors"],
-    queryFn: () => doctorsApi.server.getAll(),
+    queryFn: () => doctorsApi.client.getAll(),
   });
 };
 

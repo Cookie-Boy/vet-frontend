@@ -65,10 +65,6 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
 
   const doctorId = form.watch("doctorId");
   const date = form.watch("date");
-  // const correctSlots = await appointmentsApi.server.getAvailableSlots(
-  //   doctorId === "any" ? null : doctorId,
-  //   date ? format(date, "yyyy-MM-dd") : ""
-  // );
   const { data: correctSlots, isLoading: slotsLoading } = useAvailableSlots(
     doctorId === "any" ? null : doctorId,
     date ? format(date, "yyyy-MM-dd") : ""
@@ -82,17 +78,19 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
 
     const [startTime, endTime] = values.timeSlot.split("|");
     const selectedPet = pets.find(p => p.id === values.petId);
+    const selectedDate = values.date;
+    const startDateTime = `${format(selectedDate, "yyyy-MM-dd")}T${startTime}`;
+    const endDateTime = `${format(selectedDate, "yyyy-MM-dd")}T${endTime}`;
     
     const appointmentData = {
-      clinicId: "default", // временно
       doctorId: values.doctorId === "any" ? null : values.doctorId,
-      patientId: values.petId,
-      startTime: startTime,
-      endTime: endTime,
+      ownerId: ownerId,
+      petId: values.petId,
+      startTime: startDateTime,
+      endTime: endDateTime,
       metadata: {
         comment: values.comment,
         petName: selectedPet?.name,
-        ownerId: ownerId,
       },
     };
 
@@ -204,7 +202,7 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
                       className="text-sm"
                       onClick={() => form.setValue("timeSlot", `${slot.startTime}|${slot.endTime}`)}
                     >
-                      {format(new Date(slot.startTime), "HH:mm")}
+                      {slot.startTime.substring(0, 5)}
                     </Button>
                   ))}
                 </div>

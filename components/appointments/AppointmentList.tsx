@@ -23,10 +23,10 @@ export function AppointmentList({ appointments }: AppointmentListProps) {
 
   const now = new Date();
   const upcoming = appointments.filter(
-    (a) => new Date(a.startTime) > now && a.status === "BOOKED"
+    (a) => new Date(a.startTime) > now && a.status === "PENDING"
   );
   const past = appointments.filter(
-    (a) => new Date(a.startTime) <= now || a.status !== "BOOKED"
+    (a) => new Date(a.startTime) <= now || a.status !== "PENDING"
   );
 
   const handleCancel = async (id: string) => {
@@ -72,23 +72,19 @@ export function AppointmentList({ appointments }: AppointmentListProps) {
             <User className="mr-2 h-4 w-4 text-muted-foreground" />
             Врач: {appointment.doctorFullName || "Не назначен"}
           </div>
-          {appointment.patientFullName && (
+          {appointment.petFullName && (
             <div className="flex items-center">
               <PawPrint className="mr-2 h-4 w-4 text-muted-foreground" />
-              Питомец: {appointment.patientFullName}
+              Питомец: {appointment.petFullName}
             </div>
           )}
-          <div className="flex items-center">
-            <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
-            Клиника: {appointment.clinicName || "Основное отделение"}
-          </div>
           {appointment.metadata?.comment && (
             <p className="text-muted-foreground mt-2 italic">
               "{appointment.metadata.comment}"
             </p>
           )}
         </div>
-        {appointment.status === "BOOKED" && (
+        {appointment.status === "PENDING" && (
           <div className="mt-4 flex justify-end">
             <Button
               variant="outline"

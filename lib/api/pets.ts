@@ -23,16 +23,16 @@ export const petsApi = {
   },
 
   createPet: async (data: PetRequest): Promise<PetResponse> => {
-    const response = await apiClient.post(`/api/pets`, data);
+    const response = await apiClient.post(`/api/profile/pets`, data);
     return response.data;
   },
 
   updatePet: async (petId: string, data: Partial<PetRequest>): Promise<PetResponse> => {
-    const response = await apiClient.put(`/api/pets/${petId}`, data);
+    const response = await apiClient.put(`/api/profile/pets/${petId}`, data);
     return response.data;
   },
 
   getPetQrCodeUrl: (petId: string, width: number = 300, height: number = 300): string => {
-  return `/api/pets/${petId}/qrcode?width=${width}&height=${height}`;
+  return `/api/profile/pets/${petId}/qrcode?width=${width}&height=${height}`;
 },
 };

@@ -3,26 +3,17 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { appointmentsApi, AppointmentFilters } from "@/lib/api/appointments";
 import { AppointmentRequest } from "@/types/appointment";
 
-export const useAppointments = (filters: AppointmentFilters) => {
+export const useAppointments = (ownerId: string | undefined) => {
   return useQuery({
-    queryKey: ["appointments", filters],
-    queryFn: () => appointmentsApi.client.getAppointments(filters),
-    enabled: !!filters.patientId || !!filters.doctorId, // включаем только если есть фильтр
-  });
-};
-
-export const usePatientAppointments = (patientId?: string) => {
-  return useQuery({
-    queryKey: ["appointments", "patient", patientId],
-    queryFn: () => appointmentsApi.client.getByPatient(patientId!),
-    enabled: !!patientId,
+    queryKey: ["appointments"],
+    queryFn: () => appointmentsApi.client.getAppointments(ownerId),
   });
 };
 
 export const useAvailableSlots = (doctorId: string | null, date: string) => {
   return useQuery({
     queryKey: ["slots", doctorId, date],
-    queryFn: () => appointmentsApi.server.getAvailableSlots(doctorId, date),
+    queryFn: () => appointmentsApi.client.getAvailableSlots(doctorId, date),
     enabled: !!date,
   });
 };
