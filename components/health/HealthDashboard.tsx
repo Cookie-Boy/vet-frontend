@@ -5,9 +5,9 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PetResponse } from "@/types/pet";
-import { CollarStatus } from "./CollarStatus";
-import { VitalsChart } from "./VitalsChart";
-import { RecommendationsPanel } from "./RecommendationsPanel";
+import { CollarStatus } from "@/components/health/CollarStatus";
+import { VitalsChart } from "@/components/health/VitalsChart";
+import { RecommendationsPanel } from "@/components/health/RecommendationsPanel";
 
 interface HealthDashboardProps {
   pets: PetResponse[];
@@ -20,7 +20,7 @@ export function HealthDashboard({ pets }: HealthDashboardProps) {
   return (
     <div className="space-y-6">
       <div className="max-w-xs">
-        <Select value={selectedPetId} onValueChange={setSelectedPetId}>
+        <Select value={selectedPetId} onValueChange={(value) => value && setSelectedPetId(value)}>
           <SelectTrigger>
             <SelectValue placeholder="Выберите питомца" />
           </SelectTrigger>

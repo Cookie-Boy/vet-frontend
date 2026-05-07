@@ -44,8 +44,7 @@ export default function ProfileForm({ initialData, userId }: ProfileFormProps) {
       await profileApi.updateOwner(userId, {
         id: userId,
         ...values,
-        // tgChatId не обновляем через эту форму, оно устанавливается ботом
-        tgChatId: initialData?.tgChatId,
+        vkUserId: initialData?.vkUserId,
       });
       toast.success("Профиль успешно обновлён");
     } catch (error) {
@@ -118,25 +117,25 @@ export default function ProfileForm({ initialData, userId }: ProfileFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Интеграция с Telegram</CardTitle>
+          <CardTitle>Интеграция с ВКонтакте</CardTitle>
           <CardDescription>
-            Статус подключения Telegram-бота
+            Статус подключения VK-бота
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
             <div className="text-sm font-medium text-muted-foreground mb-1">
-              Telegram Chat ID
+              VK ID
             </div>
             <div className="flex items-center gap-2">
               <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
-                {initialData?.tgChatId || "Не привязан"}
+                {initialData?.vkUserId || "Не привязан"}
               </code>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {initialData?.tgChatId 
+              {initialData?.vkUserId 
                 ? "Бот активен. Вы будете получать уведомления в Telegram."
-                : "Запустите бота @VetPlatformBot и отправьте команду /start для привязки."}
+                : "Перейдите в сообщество и отправьте команду /start для привязки."}
             </p>
           </div>
         </CardContent>

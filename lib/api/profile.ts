@@ -14,15 +14,15 @@ export const profileApi = {
     return response.data;
   },
 
-  getOwnerByTgChatId: async (tgChatId: string): Promise<OwnerResponse> => {
+  getOwnerByVkUserId: async (vkUserId: string): Promise<OwnerResponse> => {
     const serverClient = await createServerApiClient();
     const response = await serverClient.get(`/api/profile/owners/by-tg-chat-id`, {
-      params: { tgChatId },
+      params: { vkUserId },
     });
     return response.data;
   },
 
-  getTgChatIdByOwnerId: async (ownerId: string): Promise<string> => {
+  getVkUserIdByOwnerId: async (ownerId: string): Promise<string> => {
     const serverClient = await createServerApiClient();
     const response = await serverClient.get(`/api/profile/owners/${ownerId}/tg-chat-id`);
     return response.data;

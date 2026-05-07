@@ -48,7 +48,7 @@ export interface PetResponse {
 
 export interface OwnerRequest {
   id: string;
-  tgChatId?: string;
+  vkUserId?: string;
   firstName?: string;
   lastName?: string;
   phone?: string;
@@ -56,7 +56,7 @@ export interface OwnerRequest {
 
 export interface OwnerResponse {
   id: string;
-  tgChatId?: string;
+  vkUserId?: string;
   firstName?: string;
   lastName?: string;
   phone?: string;
