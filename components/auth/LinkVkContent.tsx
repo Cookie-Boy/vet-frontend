@@ -43,6 +43,9 @@ export function LinkVkContent({ token, initialSession }: LinkVkContentProps) {
         }
       );
 
+      console.log(response)
+      console.log("response.ok? = " + response.ok)
+
       if (response.ok) {
         setResult("success");
         toast.success("VK аккаунт успешно привязан!");

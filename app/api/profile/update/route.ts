@@ -25,7 +25,7 @@ export async function PUT(request: NextRequest) {
         firstName,
         lastName,
         phone,
-        tgChatId: body.tgChatId,
+        vkUserId: body.vkUserId,
       },
       {
         headers: {
