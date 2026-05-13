@@ -1,4 +1,4 @@
-// app/(dashboard)/page.tsx
+// app/dashboard/page.tsx
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { redirect } from "next/navigation";
@@ -20,7 +20,7 @@ export default async function DashboardPage() {
   const isAdmin = session.user.role === "ADMIN";
 
   const [pets, medications] = await Promise.all([
-    petsApi.getPets(ownerId).catch(() => []),
+    petsApi.getPetsByOwnerId(ownerId).catch(() => []),
     medicationsApi.server.getAll().catch(() => [])
   ]);
 
@@ -65,7 +65,7 @@ export default async function DashboardPage() {
           <PetsSummary pets={pets} />
         </div>
         <div className="lg:col-span-2">
-          <UpcomingAppointments appointments={allAppointments} />
+          <UpcomingAppointments appointments={pendingAppointments} />
         </div>
         <div>
           <HealthAlerts alerts={healthAlerts} />

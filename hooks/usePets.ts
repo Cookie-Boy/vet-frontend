@@ -6,7 +6,7 @@ import { PetRequest } from "@/types/pet";
 export const usePets = (ownerId?: string) => {
   return useQuery({
     queryKey: ["pets", ownerId],
-    queryFn: () => petsApi.getPets(ownerId!),
+    queryFn: () => petsApi.getPetsByOwnerId(ownerId!),
     enabled: !!ownerId,
   });
 };

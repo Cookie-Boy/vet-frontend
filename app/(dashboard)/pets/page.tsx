@@ -11,7 +11,7 @@ export default async function PetsPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/login");
 
-  const pets = await petsApi.getPets(session.user.id);
+  const pets = await petsApi.getPetsByOwnerId(session.user.id);
 
   return (
     <div className="space-y-6">

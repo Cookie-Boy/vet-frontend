@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams} from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -23,6 +24,8 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
   });
+
+  const redirectUrl = searchParams.get('redirect') || "/";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -82,7 +85,7 @@ export default function RegisterPage() {
         // Если вход не удался, перенаправляем на страницу входа
         router.push("/login");
       } else {
-        router.push("/");
+        router.push(redirectUrl);
         router.refresh();
       }
     } catch (error: any) {

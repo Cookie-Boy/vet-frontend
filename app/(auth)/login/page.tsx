@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams} from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,9 +13,18 @@ import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const callbackUrl = searchParams.toString() 
+    ? `/link-vk?${searchParams.toString()}` 
+    : "/";
+
+  const registerUrl = searchParams.toString()
+  ? `/register?redirect=${encodeURIComponent(callbackUrl)}&${searchParams.toString()}`
+  : "/register";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +40,7 @@ export default function LoginPage() {
       if (result?.error) {
         toast.error("Неверный email или пароль");
       } else {
-        router.push("/");
+        router.push(callbackUrl);
         router.refresh();
       }
     } catch (error) {
@@ -87,7 +96,7 @@ export default function LoginPage() {
             </Button>
             <p className="text-sm text-muted-foreground">
               Нет аккаунта?{" "}
-              <Link href="/register" className="text-primary hover:underline">
+              <Link href={registerUrl} className="text-primary hover:underline">
                 Зарегистрироваться
               </Link>
             </p>

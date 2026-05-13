@@ -4,9 +4,9 @@ import apiClient from "./client";
 import { createServerApiClient } from "./server-client";
 
 export const petsApi = {
-  getPets: async (ownerId: string): Promise<PetResponse[]> => {
+  getPetsByOwnerId: async (ownerId: string): Promise<PetResponse[]> => {
     const serverClient = await createServerApiClient();
-    const response = await serverClient.get(`/api/profile/pets?ownerId=${ownerId}`);
+    const response = await serverClient.get(`/api/profile/pets/owner/${ownerId}`);
     return response.data;
   },
 

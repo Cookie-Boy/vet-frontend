@@ -1,25 +1,25 @@
-// frontend/components/layout/Header.tsx
+// components/layout/Header.tsx
 "use client";
 
+import { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
-import { LogOut, PawPrint } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { LogOut, PawPrint, User, ChevronDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function Header() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const getUserInitials = (name?: string) => {
+  const isLoading = status === "loading";
+  const userName = session?.user?.name || "Пользователь";
+  const userEmail = session?.user?.email || "";
+
+  const getUserInitials = (name?: string | null) => {
     if (!name) return "U";
-    const parts = name.split(" ");
+    const parts = name.trim().split(/\s+/);
     if (parts.length >= 2) {
       return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     }
@@ -29,44 +29,63 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white px-6 shadow-sm">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-          <PawPrint className="h-6 w-6 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">ВетПлатформа</h1>
-          <p className="text-xs text-muted-foreground">Единая цифровая система</p>
-        </div>
+        <PawPrint className="h-6 w-6 text-primary" />
+        <h1 className="text-xl font-semibold">ВетПлатформа</h1>
       </div>
 
-      <div className="flex items-center gap-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
-              <Avatar className="h-10 w-10">
-                <AvatarFallback className="bg-primary/10 text-primary">
-                  {getUserInitials(session?.user?.name || "")}
+      <div className="relative">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-10 w-10 rounded-full bg-muted animate-pulse">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <>
+            <Button
+              variant="ghost"
+              className="flex items-center gap-2 h-10 px-2"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                  {getUserInitials(session?.user?.name)}
                 </AvatarFallback>
               </Avatar>
+              <ChevronDown className="h-4 w-4" />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end">
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  {session?.user?.name || "Пользователь"}
-                </p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {session?.user?.email || ""}
-                </p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/login" })}>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Выйти</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+
+            {menuOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+                <div className="absolute right-0 mt-2 w-56 bg-white border rounded-lg shadow-lg z-20">
+                  <div className="px-4 py-3 border-b">
+                    <p className="text-sm font-medium">{userName}</p>
+                    <p className="text-xs text-muted-foreground">{userEmail}</p>
+                  </div>
+                  <button
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      router.push("/profile");
+                    }}
+                  >
+                    <User className="h-4 w-4" />
+                    Профиль
+                  </button>
+                  <button
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      signOut({ callbackUrl: "/login" });
+                    }}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Выйти
+                  </button>
+                </div>
+              </>
+            )}
+          </>
+        )}
       </div>
     </header>
   );
