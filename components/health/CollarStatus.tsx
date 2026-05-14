@@ -7,10 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Activity, Heart, Thermometer, MapPin, Wifi, WifiOff } from "lucide-react";
 import { MapContainer, TileLayer, Circle, Marker, Popup } from "react-leaflet";
-import { useEffect } from "react";
 import L from "leaflet";
 
-// Фикс иконок Leaflet в Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
@@ -69,12 +67,12 @@ export function CollarStatus({ pet }: CollarStatusProps) {
                 <p className="text-2xl font-bold">{vitals.temperature.toFixed(1)}°C</p>
               </div>
             </div>
-            {vitals.activityLevel !== undefined && (
+            {vitals.distanceFromHome !== undefined && (
               <div className="flex items-center space-x-2">
-                <Activity className="h-5 w-5 text-green-500" />
+                <MapPin className="h-5 w-5 text-green-500" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Активность</p>
-                  <p className="text-2xl font-bold">{vitals.activityLevel}%</p>
+                  <p className="text-sm text-muted-foreground">Расстояние от дома</p>
+                  <p className="text-2xl font-bold">{vitals.distanceFromHome}м</p>
                 </div>
               </div>
             )}

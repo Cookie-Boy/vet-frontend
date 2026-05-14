@@ -1,8 +1,9 @@
 "use client";
 
+import { Suspense } from "react";
 import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams} from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,20 +12,24 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { PawPrint, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-export default function LoginPage() {
+// Выносим логику с useSearchParams в отдельный компонент
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const callbackUrl = searchParams.toString() 
-    ? `/link-vk?${searchParams.toString()}` 
-    : "/";
+  const token = searchParams.get('token');
+ 
+  let callbackUrl = "/";
+  if (token) {
+    callbackUrl = `/link-vk?token=${token}`;
+  }
 
   const registerUrl = searchParams.toString()
-  ? `/register?redirect=${encodeURIComponent(callbackUrl)}&${searchParams.toString()}`
-  : "/register";
+    ? `/register?redirect=${encodeURIComponent(callbackUrl)}`
+    : "/register";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,5 +109,17 @@ export default function LoginPage() {
         </form>
       </Card>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

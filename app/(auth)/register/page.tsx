@@ -1,8 +1,9 @@
 // frontend/app/(auth)/register/page.tsx
 "use client";
 
+import { Suspense } from "react";
 import { useState } from "react";
-import { useRouter, useSearchParams} from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { PawPrint, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -46,13 +47,8 @@ export default function RegisterPage() {
 
     setIsLoading(true);
 
-    console.log('Submitting registration form...');
-    console.log('Form data:', { ...formData, password: '***', confirmPassword: '***' });
-
     try {
-      // 1. Регистрация через наш API
-        console.log('Sending request to /api/auth/register');
-        const res = await fetch("/api/auth/register", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -64,9 +60,7 @@ export default function RegisterPage() {
         }),
       });
 
-      console.log('Response status:', res.status);
       const data = await res.json();
-      console.log('Response data:', data);
 
       if (!res.ok) {
         throw new Error(data.error || "Ошибка регистрации");
@@ -74,7 +68,6 @@ export default function RegisterPage() {
 
       toast.success("Регистрация успешна! Выполняем вход...");
 
-      // 2. Автоматический вход
       const signInResult = await signIn("credentials", {
         email: formData.email,
         password: formData.password,
@@ -82,7 +75,6 @@ export default function RegisterPage() {
       });
 
       if (signInResult?.error) {
-        // Если вход не удался, перенаправляем на страницу входа
         router.push("/login");
       } else {
         router.push(redirectUrl);
@@ -202,5 +194,18 @@ export default function RegisterPage() {
         </form>
       </Card>
     </div>
+  );
+}
+
+// Основной компонент страницы с Suspense
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }>
+      <RegisterForm />
+    </Suspense>
   );
 }
