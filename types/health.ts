@@ -5,11 +5,11 @@ export interface VitalsReading {
   heartRate: number;
   respiratoryRate: number;
   temperature: number;
-  distanceFromHome?: number;
   activityLevel?: number; // 0-100
   location?: {
     lat: number;
     lon: number;
+    distanceFromHome?: number;
   };
 }
 

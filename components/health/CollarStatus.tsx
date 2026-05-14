@@ -67,12 +67,12 @@ export function CollarStatus({ pet }: CollarStatusProps) {
                 <p className="text-2xl font-bold">{vitals.temperature.toFixed(1)}°C</p>
               </div>
             </div>
-            {vitals.distanceFromHome !== undefined && (
+            {vitals.location !== undefined && (
               <div className="flex items-center space-x-2">
                 <MapPin className="h-5 w-5 text-green-500" />
                 <div>
                   <p className="text-sm text-muted-foreground">Расстояние от дома</p>
-                  <p className="text-2xl font-bold">{vitals.distanceFromHome}м</p>
+                  <p className="text-2xl font-bold">{vitals.location.distanceFromHome}м</p>
                 </div>
               </div>
             )}
