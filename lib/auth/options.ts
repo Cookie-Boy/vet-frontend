@@ -42,8 +42,10 @@ export const authOptions: NextAuthOptions = {
 
           const tokenParts = data.access_token.split('.');
           const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-          const roles = payload.realm_access?.roles || [];
-          const role = roles[0] || 'user'; // или маппинг ролей
+          const roles: string[] = [];
+          if (payload.realm_access?.roles) {
+            roles.push(...payload.realm_access.roles);
+          }
 
           return {
             id: payload.sub,
@@ -51,7 +53,7 @@ export const authOptions: NextAuthOptions = {
             name: payload.name || payload.preferred_username || payload.email,
             accessToken: data.access_token,
             refreshToken: data.refresh_token,
-            role: role,
+            roles: roles,
           };
         } catch (error) {
           console.error('Auth error:', error);
@@ -68,7 +70,7 @@ export const authOptions: NextAuthOptions = {
         token.sub = user.id;
         token.email = user.email;
         token.name = user.name;
-        token.role = user.role;
+        token.roles = user.roles || [];
       }
       return token;
     },
@@ -79,6 +81,9 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.sub;
         session.user.email = token.email;
         session.user.name = token.name;
+        session.user.roles = token.roles || [];
+        session.user.isAdmin = token.roles?.includes('ADMIN') || false;
+        session.user.isDoctor = token.roles?.includes('DOCTOR') || false;
       }
       return session;
     },

@@ -14,7 +14,7 @@ export interface AppointmentResponse {
   doctorFullName?: string;
   ownerId: string;
   ownerFullName?: string;
-  petId?: string;
+  petId: string;
   petFullName?: string;
   startTime: string;
   endTime: string;

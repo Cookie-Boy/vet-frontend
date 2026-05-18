@@ -1,3 +1,4 @@
+// types/next-auth.d.ts
 import NextAuth, { DefaultSession } from "next-auth";
 
 declare module "next-auth" {
@@ -8,7 +9,9 @@ declare module "next-auth" {
       id?: string;
       email?: string | null;
       name?: string | null;
-      role?: string | null;
+      roles?: string[];
+      isAdmin?: boolean;
+      isDoctor?: boolean;
     } & DefaultSession["user"];
   }
 
@@ -18,7 +21,7 @@ declare module "next-auth" {
     name?: string;
     accessToken?: string;
     refreshToken?: string;
-    role?: string;
+    roles?: string[];
   }
 }
 
@@ -29,5 +32,6 @@ declare module "next-auth/jwt" {
     sub?: string;
     email?: string | null;
     name?: string | null;
+    roles?: string[];
   }
 }

@@ -27,7 +27,7 @@ export function CollarStatus({ pet }: CollarStatusProps) {
     return <p className="text-muted-foreground">Загрузка данных с ошейника...</p>;
   }
 
-  if (!vitals) {
+  if (!vitals || vitals.collarStatus === "offline") {
     return <p className="text-muted-foreground">Нет данных с ошейника. Возможно, он не активен.</p>;
   }
 
@@ -97,6 +97,7 @@ export function CollarStatus({ pet }: CollarStatusProps) {
                 center={[vitals.location.lat, vitals.location.lon]}
                 zoom={15}
                 style={{ height: "100%", width: "100%" }}
+                attributionControl={false}
               >
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

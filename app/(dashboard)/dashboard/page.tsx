@@ -17,7 +17,7 @@ export default async function DashboardPage() {
   if (!session?.user?.id) redirect("/login");
 
   const ownerId = session.user.id;
-  const isAdmin = session.user.role === "ADMIN";
+  const isAdmin = session?.user?.isAdmin || false;
 
   const [pets, medications] = await Promise.all([
     petsApi.getPetsByOwnerId(ownerId).catch(() => []),

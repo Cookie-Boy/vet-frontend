@@ -14,7 +14,6 @@ export default async function AppointmentsPage() {
 
   let appointments: any[] | undefined;
   try {
-    // Предположим, есть эндпоинт /api/appointment?ownerId=...
     let ownerId = session.user.id;
     appointments = await appointmentsApi.server.getAppointments(ownerId);
     console.log("Got the appointments...");
@@ -34,12 +33,12 @@ export default async function AppointmentsPage() {
             Управляйте вашими визитами к ветеринарам
           </p>
         </div>
-        <Button>
-          <Link href="/appointments/new">
+        <Link href="/appointments/new">
+          <Button>
             <Plus className="mr-2 h-4 w-4" />
             Записаться
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       </div>
 
       <AppointmentList appointments={appointments} />

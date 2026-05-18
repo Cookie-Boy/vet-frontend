@@ -11,7 +11,6 @@ import { CalendarIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,12 +18,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { PetResponse } from "@/types/pet";
-import { doctorsApi } from "@/lib/api/doctors";
 import { useAvailableSlots, useCreateAppointment } from "@/hooks/useAppointments";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { UUID } from "crypto";
-import { appointmentsApi } from "@/lib/api/appointments";
 import { useDoctors } from "@/hooks/useDoctors";
 
 const appointmentSchema = z.object({
@@ -45,10 +42,8 @@ interface AppointmentFormProps {
 
 export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: AppointmentFormProps) {
   const router = useRouter();
-  const [selectedDoctor, setSelectedDoctor] = useState<string | null>(preselectedDoctorId || null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   
-  // const doctors = await doctorsApi.client.getAll();
   const { data: doctors } = useDoctors();
   const createAppointment = useCreateAppointment();
 
@@ -63,34 +58,43 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
     },
   });
 
-  const doctorId = form.watch("doctorId");
+  // Отслеживаем выбранные значения для отображения имён
+  const selectedPetId = form.watch("petId");
+  const selectedDoctorId = form.watch("doctorId");
+  const selectedPet = pets.find(p => p.id === selectedPetId);
+  const selectedDoctor = doctors?.find(d => d.id === selectedDoctorId);
+
+  const doctorIdForSlots = selectedDoctorId === "any" ? null : selectedDoctorId;
   const date = form.watch("date");
   const { data: correctSlots, isLoading: slotsLoading } = useAvailableSlots(
-    doctorId === "any" ? null : doctorId,
+    doctorIdForSlots,
     date ? format(date, "yyyy-MM-dd") : ""
   );
 
   const onSubmit = async (values: AppointmentFormValues) => {
+    // Отладка: выводим значения формы
+    console.log("Form values:", values);
+
     if (!values.timeSlot) {
       toast.error("Выберите время приёма");
       return;
     }
 
     const [startTime, endTime] = values.timeSlot.split("|");
-    const selectedPet = pets.find(p => p.id === values.petId);
-    const selectedDate = values.date;
-    const startDateTime = `${format(selectedDate, "yyyy-MM-dd")}T${startTime}`;
-    const endDateTime = `${format(selectedDate, "yyyy-MM-dd")}T${endTime}`;
+    const selectedPetObj = pets.find(p => p.id === values.petId);
+    const selectedDateObj = values.date;
+    const startDateTime = `${format(selectedDateObj, "yyyy-MM-dd")}T${startTime}`;
+    const endDateTime = `${format(selectedDateObj, "yyyy-MM-dd")}T${endTime}`;
     
     const appointmentData = {
-      doctorId: values.doctorId === "any" ? null : values.doctorId,
+      doctorId: values.doctorId, // теперь не преобразуем в null, так как null уже может быть
       ownerId: ownerId,
       petId: values.petId,
       startTime: startDateTime,
       endTime: endDateTime,
       metadata: {
         comment: values.comment,
-        petName: selectedPet?.name,
+        petName: selectedPetObj?.name,
       },
     };
 
@@ -99,6 +103,7 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
       toast.success("Запись создана! Ожидайте подтверждения.");
       router.push("/appointments");
     } catch (error) {
+      console.error("Appointment creation error:", error);
       toast.error("Не удалось создать запись. Попробуйте другое время.");
     }
   };
@@ -110,9 +115,13 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
           <CardTitle>Выберите питомца</CardTitle>
         </CardHeader>
         <CardContent>
-          <Select onValueChange={(val) => form.setValue("petId", val as UUID)}>
+          <Select
+            onValueChange={(val) => form.setValue("petId", val as UUID)}
+            value={selectedPetId}
+          >
             <SelectTrigger>
-              <SelectValue placeholder="Выберите питомца" />
+              {/* Отображаем имя питомца вместо ID */}
+              {selectedPet ? selectedPet.name : "Выберите питомца"}
             </SelectTrigger>
             <SelectContent>
               {pets.map((pet) => (
@@ -134,11 +143,16 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
         </CardHeader>
         <CardContent>
           <Select
-            value={form.watch("doctorId") || "any"}
+            value={selectedDoctorId || "any"}
             onValueChange={(val) => form.setValue("doctorId", val === "any" ? null : val)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Любой врач" />
+              {/* Отображаем ФИО врача или "Любой врач" */}
+              {selectedDoctorId === null
+                ? "Любой врач"
+                : selectedDoctor
+                ? `${selectedDoctor.lastName} ${selectedDoctor.firstName}`
+                : "Выберите врача"}
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="any">Любой врач</SelectItem>
@@ -179,8 +193,9 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
                   onSelect={(d) => {
                     form.setValue("date", d as Date);
                     form.setValue("timeSlot", "");
+                    setSelectedDate(d);
                   }}
-                  disabled={(d) => d < new Date() || d.getDay() === 0 || d.getDay() === 6} // пример: только будни
+                  disabled={(d) => d < new Date() || d.getDay() === 0 || d.getDay() === 6}
                   initialFocus
                 />
               </PopoverContent>

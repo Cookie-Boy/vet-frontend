@@ -13,7 +13,7 @@ export default async function MedicationsPage() {
   if (!session?.user) redirect("/login");
 
   // Пока разрешим всем управлять лекарствами, но можно добавить проверку isAdmin
-  const isAdmin = session.user.role === "ADMIN";
+    const isAdmin = session.user.role === "ADMIN"; // предполагаем, что роль есть в сессии
 
   try {
     const medications = await medicationsApi.server.getAll();

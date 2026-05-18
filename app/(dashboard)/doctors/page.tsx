@@ -27,12 +27,12 @@ export default async function DoctorsPage() {
             </p>
           </div>
           {isAdmin && (
-            <Button>
-              <Link href="/doctors/new">
+            <Link href="/doctors/new">
+              <Button>
                 <Plus className="mr-2 h-4 w-4" />
                 Добавить врача
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           )}
         </div>
 

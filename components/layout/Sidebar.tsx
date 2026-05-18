@@ -23,7 +23,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   
-  const isAdmin = session?.user.role === "ADMIN";
+  const isAdmin = session?.user?.isAdmin || false;
 
   const navigation = [
     { name: "Дашборд", href: "/", icon: LayoutDashboard, alwaysShow: true },
