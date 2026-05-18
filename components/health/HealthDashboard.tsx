@@ -22,11 +22,15 @@ export function HealthDashboard({ pets }: HealthDashboardProps) {
       <div className="max-w-xs">
         <Select value={selectedPetId} onValueChange={(value) => value && setSelectedPetId(value)}>
           <SelectTrigger>
-            <SelectValue placeholder="Выберите питомца" />
+            <SelectValue>
+              {selectedPet ? selectedPet.name : "Выберите питомца"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {pets.map((pet) => (
-              <SelectItem key={pet.id} value={pet.id}>{pet.name} ({pet.breed})</SelectItem>
+              <SelectItem key={pet.id} value={pet.id}>
+                {pet.name} ({pet.breed})
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>

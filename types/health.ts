@@ -9,7 +9,7 @@ export interface VitalsReading {
   location?: {
     lat: number;
     lon: number;
-    distanceFromHome?: number;
+    distanceFromHome: number;
   };
 }
 

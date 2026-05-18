@@ -103,7 +103,9 @@ export function PetForm({ ownerId, initialData }: PetFormProps) {
                     <Label htmlFor="species">Вид *</Label>
                     <Select onValueChange={(val) => setValue("species", val as "cat" | "dog")} defaultValue={selectedSpecies}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Выберите вид" />
+                        <SelectValue>
+                          {selectedSpecies === "cat" ? "Кошка" : selectedSpecies === "dog" ? "Собака" : "Выберите вид"}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="cat">Кошка</SelectItem>

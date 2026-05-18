@@ -72,14 +72,15 @@ export function CollarStatus({ pet }: CollarStatusProps) {
                 <MapPin className="h-5 w-5 text-green-500" />
                 <div>
                   <p className="text-sm text-muted-foreground">Расстояние от дома</p>
-                  <p className="text-2xl font-bold">{vitals.location.distanceFromHome}м</p>
+                  <p className="text-2xl font-bold">{vitals.location.distanceFromHome.toFixed(2)} м</p>
                 </div>
               </div>
             )}
           </div>
           {vitals.isAnomalous && (
             <p className="mt-3 text-sm text-destructive font-medium">
-              ⚠️ Обнаружена аномалия: {vitals.anomalyReason || "Показатели вне нормы"}
+              ⚠️ Обнаружена аномалия!<br />
+              {vitals.anomalyReason || "Показатели вне нормы"}
             </p>
           )}
         </CardContent>
