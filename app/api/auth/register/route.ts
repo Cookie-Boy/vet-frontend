@@ -131,6 +131,7 @@ export async function POST(request: NextRequest) {
     console.log('Creating owner in Profile Service with user token...');
     const ownerData = {
       id: userId,
+      email: email,
       firstName,
       lastName,
       phone: phone || '',

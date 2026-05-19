@@ -49,15 +49,17 @@ export interface PetResponse {
 export interface OwnerRequest {
   id: string;
   vkUserId?: string;
-  firstName?: string;
-  lastName?: string;
+  email: string;
+  firstName: string;
+  lastName: string;
   phone?: string;
 }
 
 export interface OwnerResponse {
   id: string;
   vkUserId?: string;
-  firstName?: string;
-  lastName?: string;
+  email: string;
+  firstName: string;
+  lastName: string;
   phone?: string;
 }
