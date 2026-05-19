@@ -29,6 +29,21 @@ export const appointmentsApi = {
       console.log(response.data);
       return response.data;
     },
+    getByDoctor: async (doctorId: string): Promise<AppointmentResponse[]> => {
+      const client = await createServerApiClient();
+      const response = await client.get(`/api/appointment/doctor/${doctorId}`);
+      return response.data;
+    },
+    getByOwner: async (ownerId: string): Promise<AppointmentResponse[]> => {
+      const client = await createServerApiClient();
+      const response = await client.get(`/api/appointment/owner/${ownerId}`);
+      return response.data;
+    },
+    getAll: async (): Promise<AppointmentResponse[]> => {
+      const client = await createServerApiClient();
+      const response = await client.get("/api/appointment");
+      return response.data;
+    },
   },
 
   // Клиентские методы

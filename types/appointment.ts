@@ -2,7 +2,6 @@ export interface AppointmentRequest {
   doctorId: string;
   ownerId: string;
   petId: string;
-  tgUserName?: string;
   startTime: string;
   endTime: string;
   metadata?: Record<string, any>;

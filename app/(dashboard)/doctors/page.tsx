@@ -12,7 +12,7 @@ export default async function DoctorsPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/login");
 
-  const isAdmin = session.user.role === "ADMIN"; // предполагаем, что роль есть в сессии
+  const isAdmin = session?.user?.isAdmin || false;
 
   try {
     const doctors = await doctorsApi.server.getAll();
