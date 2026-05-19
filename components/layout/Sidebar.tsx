@@ -33,8 +33,8 @@ export default function Sidebar() {
   const navigation = [
     { name: "Главная", href: "/", icon: LayoutDashboard, alwaysShow: true },
     { name: "Питомцы", href: "/pets", icon: PawPrint, alwaysShow: true },
-    { name: "Записи", href: "/appointments", icon: Calendar, alwaysShow: true, requireDefaultUser: true},
-    { name: "Приёмы", href: "/appointments", icon: Calendar, alwaysShow: true, requireAdminOrDoctor: true },
+    { name: "Записи", href: "/appointments", icon: Calendar, alwaysShow: false, requireDefaultUser: true},
+    { name: "Приёмы", href: "/appointments", icon: Calendar, alwaysShow: false, requireAdminOrDoctor: true },
     { name: "Врачи", href: "/doctors", icon: Stethoscope, alwaysShow: true },
     { name: "Лекарства", href: "/medications", icon: Pill, alwaysShow: false, requireAdmin: true },
     { name: "Здоровье", href: "/health", icon: Activity, alwaysShow: true },
