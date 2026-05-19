@@ -4,7 +4,7 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Mail, Phone, Stethoscope, Edit, Trash2, Eye } from "lucide-react";
-import { DoctorResponse } from "@/types/doctor";
+import { DoctorResponse, getSpecializationLabel } from "@/types/doctor";
 import Link from "next/link";
 import { useState } from "react";
 import { useDeleteDoctor } from "@/hooks/useDoctors";
@@ -51,7 +51,7 @@ export function DoctorCard({ doctor, isAdmin }: DoctorCardProps) {
           <CardTitle className="text-lg">{fullName}</CardTitle>
           <div className="flex items-center text-sm text-muted-foreground">
             <Stethoscope className="mr-1 h-3 w-3" />
-            {doctor.specialization}
+            {getSpecializationLabel(doctor.specialization)}
           </div>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">

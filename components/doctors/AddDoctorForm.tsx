@@ -68,6 +68,8 @@ export function AddDoctorForm({ initialData }: AddDoctorFormProps) {
   });
 
   const { register, handleSubmit, formState: { errors }, setValue, watch } = form;
+  
+  const selectedSpecialization = watch("specialization");
 
   // Debounce поиска
   const debouncedSearchFn = useCallback(
@@ -176,9 +178,14 @@ export function AddDoctorForm({ initialData }: AddDoctorFormProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="specialization">Специализация *</Label>
-              <Select onValueChange={(val) => setValue("specialization", val as Specialization)} defaultValue={watch("specialization")}>
+              <Select 
+                value={selectedSpecialization}
+                onValueChange={(val) => setValue("specialization", val as Specialization)}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Выберите специализацию" />
+                  <SelectValue placeholder="Выберите специализацию">
+                    {selectedSpecialization && getSpecializationLabel(selectedSpecialization)}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {Object.values(Specialization).map((spec) => (
