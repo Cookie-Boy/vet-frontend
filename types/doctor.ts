@@ -15,22 +15,40 @@ export interface CreateReviewRequest {
 }
 
 export enum Specialization {
-  THERAPIST = "THERAPIST",
-  CARDIOLOGIST = "CARDIOLOGIST",
-  NEUROLOGIST = "NEUROLOGIST",
-  PEDIATRICIAN = "PEDIATRICIAN",
+  GENERAL_PRACTITIONER = "GENERAL_PRACTITIONER",
   SURGEON = "SURGEON",
-  OPHTHALMOLOGIST = "OPHTHALMOLOGIST",
+  DENTIST = "DENTIST",
   DERMATOLOGIST = "DERMATOLOGIST",
-  PSYCHIATRIST = "PSYCHIATRIST",
-  GYNECOLOGIST = "GYNECOLOGIST",
-  UROLOGIST = "UROLOGIST",
-  ENDOCRINOLOGIST = "ENDOCRINOLOGIST",
+  OPHTHALMOLOGIST = "OPHTHALMOLOGIST",
+  CARDIOLOGIST = "CARDIOLOGIST",
   ONCOLOGIST = "ONCOLOGIST",
-  RADIOLOGIST = "RADIOLOGIST",
-  PATHOLOGIST = "PATHOLOGIST",
-  ANESTHESIOLOGIST = "ANESTHESIOLOGIST",
+  EXOTIC_PETS = "EXOTIC_PETS",
+  FELINE = "FELINE",
+  CANINE = "CANINE",
 }
+
+export const SpecializationLabels: Record<Specialization, string> = {
+  [Specialization.GENERAL_PRACTITIONER]: "Терапевт",
+  [Specialization.SURGEON]: "Хирург",
+  [Specialization.DENTIST]: "Стоматолог",
+  [Specialization.DERMATOLOGIST]: "Дерматолог",
+  [Specialization.OPHTHALMOLOGIST]: "Офтальмолог",
+  [Specialization.CARDIOLOGIST]: "Кардиолог",
+  [Specialization.ONCOLOGIST]: "Онколог",
+  [Specialization.EXOTIC_PETS]: "Экзотические животные",
+  [Specialization.FELINE]: "Кошки",
+  [Specialization.CANINE]: "Собаки",
+};
+
+// Вспомогательные функции
+export const getSpecializationLabel = (specialization: Specialization): string => {
+  return SpecializationLabels[specialization] || specialization;
+};
+
+// Для преобразования из строки с бэка в enum
+export const parseSpecialization = (value: string): Specialization => {
+  return Specialization[value as keyof typeof Specialization];
+};
 
 export interface DoctorRequest {
   id: string;

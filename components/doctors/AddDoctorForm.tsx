@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { DoctorResponse, Specialization, DoctorRequest } from "@/types/doctor";
+import { DoctorResponse, Specialization, DoctorRequest, getSpecializationLabel } from "@/types/doctor";
 import { useCreateDoctor, useUpdateDoctor } from "@/hooks/useDoctors";
 import { useUserSearch, UserSearchResult } from "@/hooks/useUserSearch";
 import { debounce } from "lodash";
@@ -59,7 +59,7 @@ export function AddDoctorForm({ initialData }: AddDoctorFormProps) {
     resolver: zodResolver(doctorFormSchema),
     defaultValues: {
       userId: initialData?.id || "",
-      specialization: initialData?.specialization || Specialization.THERAPIST,
+      specialization: initialData?.specialization || Specialization.GENERAL_PRACTITIONER,
       licenseNumber: initialData?.licenseNumber || "",
       startWorkingDay: initialData?.startWorkingDay || "09:00:00",
       endWorkingDay: initialData?.endWorkingDay || "18:00:00",
@@ -182,7 +182,9 @@ export function AddDoctorForm({ initialData }: AddDoctorFormProps) {
                 </SelectTrigger>
                 <SelectContent>
                   {Object.values(Specialization).map((spec) => (
-                    <SelectItem key={spec} value={spec}>{spec}</SelectItem>
+                    <SelectItem key={spec} value={spec}>
+                      {getSpecializationLabel(spec)}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
