@@ -121,7 +121,7 @@ export function AddDoctorForm({ initialData }: AddDoctorFormProps) {
         toast.success("Данные врача обновлены");
       } else {
         await createDoctor.mutateAsync(payload);
-        toast.success("Врач добавлен. Роль DOCTOR назначена.");
+        toast.success("Врач добавлен.");
       }
       router.push("/doctors");
       router.refresh();

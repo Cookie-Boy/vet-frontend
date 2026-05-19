@@ -15,6 +15,8 @@ async function searchUsers(query: string): Promise<UserSearchResult[]> {
   const response = await apiClient.get("/api/profile/owners/search", {
     params: { query: query },
   });
+  console.log("USER SEARCH:");
+  console.log(response.data);
   return response.data;
 }
 
