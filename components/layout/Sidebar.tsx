@@ -24,11 +24,17 @@ export default function Sidebar() {
   const { data: session } = useSession();
   
   const isAdmin = session?.user?.isAdmin || false;
+  const isDoctor = session?.user?.isDoctor || false;
+
+  <h1 className="text-3xl font-bold">
+            {isDoctor ? "Мои приёмы" : isAdmin ? "Все приёмы" : "Мои записи"}
+          </h1>
 
   const navigation = [
-    { name: "Дашборд", href: "/", icon: LayoutDashboard, alwaysShow: true },
+    { name: "Главная", href: "/", icon: LayoutDashboard, alwaysShow: true },
     { name: "Питомцы", href: "/pets", icon: PawPrint, alwaysShow: true },
-    { name: "Записи", href: "/appointments", icon: Calendar, alwaysShow: true },
+    { name: "Записи", href: "/appointments", icon: Calendar, alwaysShow: true, requireDefaultUser: true},
+    { name: "Приёмы", href: "/appointments", icon: Calendar, alwaysShow: true, requireAdminOrDoctor: true },
     { name: "Врачи", href: "/doctors", icon: Stethoscope, alwaysShow: true },
     { name: "Лекарства", href: "/medications", icon: Pill, alwaysShow: false, requireAdmin: true },
     { name: "Здоровье", href: "/health", icon: Activity, alwaysShow: true },
@@ -36,7 +42,10 @@ export default function Sidebar() {
   ];
 
   const filteredNavigation = navigation.filter(item => 
-    item.alwaysShow || (item.requireAdmin && isAdmin)
+    item.alwaysShow || 
+    (item.requireAdmin && isAdmin) || 
+    (item.requireAdminOrDoctor && (isAdmin || isDoctor)) || 
+    (item.requireDefaultUser && (!isAdmin && !isDoctor))
   );
 
   return (
