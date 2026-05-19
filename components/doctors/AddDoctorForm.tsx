@@ -97,6 +97,10 @@ export function AddDoctorForm({ initialData }: AddDoctorFormProps) {
       toast.error("Выберите пользователя");
       return;
     }
+
+    console.log("Selected user:", selectedUser);
+    console.log("Selected user email:", selectedUser.email);
+
     setIsLoading(true);
     try {
       const payload: DoctorRequest = {
