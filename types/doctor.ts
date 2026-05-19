@@ -33,16 +33,17 @@ export enum Specialization {
 }
 
 export interface DoctorRequest {
+  id: string;
   firstName: string;
   lastName: string;
   middleName?: string;
+  email: string;
   specialization: Specialization;
   licenseNumber: string;
   phoneNumber: string;
-  email: string;
-  hireDate: string; // YYYY-MM-DD
-  startWorkingDay: string; // HH:mm:ss
-  endWorkingDay: string; // HH:mm:ss
+  hireDate: string;
+  startWorkingDay: string;
+  endWorkingDay: string;
   bio?: string;
 }
 
@@ -51,10 +52,10 @@ export interface DoctorResponse {
   firstName: string;
   lastName: string;
   middleName?: string;
+  email: string;
   specialization: Specialization;
   licenseNumber: string;
   phoneNumber: string;
-  email: string;
   hireDate: string;
   startWorkingDay: string;
   endWorkingDay: string;

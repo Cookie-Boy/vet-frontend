@@ -70,24 +70,27 @@ export function DoctorCard({ doctor, isAdmin }: DoctorCardProps) {
           {doctor.bio && <p className="text-xs text-muted-foreground line-clamp-2">{doctor.bio}</p>}
         </CardContent>
         <CardFooter className="mt-auto flex gap-2 items-center">
-          <Button variant="default" size="sm" className="flex-1">
-            <Link href={`/appointments/new?doctorId=${doctor.id}`}>
+          <Link href={`/appointments/new?doctorId=${doctor.id}`} className="flex-1">
+            <Button variant="default" size="sm" className="w-full">
               <Calendar className="mr-2 h-4 w-4" />
               Записаться
-            </Link>
-          </Button>
-          <Button variant="outline" size="icon">
-            <Link href={`/doctors/${doctor.id}`}>
+            </Button>
+          </Link>
+          
+          <Link href={`/doctors/${doctor.id}`}>
+            <Button variant="outline" size="icon">
               <Eye className="h-4 w-4" />
-            </Link>
-          </Button>
+            </Button>
+          </Link>
+          
           {isAdmin && (
             <>
-              <Button variant="outline" size="icon">
-                <Link href={`/doctors/${doctor.id}/edit`}>
+              <Link href={`/doctors/${doctor.id}/edit`}>
+                <Button variant="outline" size="icon">
                   <Edit className="h-4 w-4" />
-                </Link>
-              </Button>
+                </Button>
+              </Link>
+              
               <Button variant="outline" size="icon" onClick={() => setShowDeleteDialog(true)}>
                 <Trash2 className="h-4 w-4" />
               </Button>
