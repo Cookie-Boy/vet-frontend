@@ -72,7 +72,6 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
   );
 
   const onSubmit = async (values: AppointmentFormValues) => {
-    // Отладка: выводим значения формы
     console.log("Form values:", values);
 
     if (!values.timeSlot) {
@@ -83,11 +82,23 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
     const [startTime, endTime] = values.timeSlot.split("|");
     const selectedPetObj = pets.find(p => p.id === values.petId);
     const selectedDateObj = values.date;
-    const startDateTime = `${format(selectedDateObj, "yyyy-MM-dd")}T${startTime}`;
-    const endDateTime = `${format(selectedDateObj, "yyyy-MM-dd")}T${endTime}`;
+    
+    const timezoneOffset = new Date().getTimezoneOffset();
+    
+    const startDateTimeStr = `${format(selectedDateObj, "yyyy-MM-dd")}T${startTime}`;
+    const endDateTimeStr = `${format(selectedDateObj, "yyyy-MM-dd")}T${endTime}`;
+    
+    const startLocalDate = new Date(startDateTimeStr);
+    const endLocalDate = new Date(endDateTimeStr);
+    
+    const startUTC = new Date(startLocalDate.getTime() + timezoneOffset * 60000);
+    const endUTC = new Date(endLocalDate.getTime() + timezoneOffset * 60000);
+    
+    const startDateTime = startUTC.toISOString();
+    const endDateTime = endUTC.toISOString();
     
     const appointmentData = {
-      doctorId: values.doctorId, // теперь не преобразуем в null, так как null уже может быть
+      doctorId: values.doctorId,
       ownerId: ownerId,
       petId: values.petId,
       startTime: startDateTime,
@@ -95,6 +106,8 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
       metadata: {
         comment: values.comment,
         petName: selectedPetObj?.name,
+        originalTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        originalOffset: timezoneOffset
       },
     };
 
