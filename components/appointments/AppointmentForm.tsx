@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { UUID } from "crypto";
 import { useDoctors } from "@/hooks/useDoctors";
+import { fromZonedTime } from 'date-fns-tz';
 
 const appointmentSchema = z.object({
   petId: z.string().min(1, "Выберите питомца"),
@@ -81,33 +82,30 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
 
     const [startTime, endTime] = values.timeSlot.split("|");
     const selectedPetObj = pets.find(p => p.id === values.petId);
-    const selectedDateObj = values.date;
-    
-    const timezoneOffset = new Date().getTimezoneOffset();
-    
-    const startDateTimeStr = `${format(selectedDateObj, "yyyy-MM-dd")}T${startTime}`;
-    const endDateTimeStr = `${format(selectedDateObj, "yyyy-MM-dd")}T${endTime}`;
-    
-    const startLocalDate = new Date(startDateTimeStr);
-    const endLocalDate = new Date(endDateTimeStr);
-    
-    const startUTC = new Date(startLocalDate.getTime() + timezoneOffset * 60000);
-    const endUTC = new Date(endLocalDate.getTime() + timezoneOffset * 60000);
-    
-    const startDateTime = startUTC.toISOString();
-    const endDateTime = endUTC.toISOString();
-    
+
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    const dateStr = format(values.date, "yyyy-MM-dd");
+    const startLocalStr = `${dateStr} ${startTime}`;  // "2026-05-20 14:00"
+    const endLocalStr = `${dateStr} ${endTime}`;
+
+    console.log("Local Time: " + startLocalStr)
+
+    const startUTC = fromZonedTime(startLocalStr, userTimezone);
+    const endUTC = fromZonedTime(endLocalStr, userTimezone);
+
+    console.log("UTC Time: " + startUTC)
+
     const appointmentData = {
-      doctorId: values.doctorId,
+      doctorId: values.doctorId, // теперь не преобразуем в null, так как null уже может быть
       ownerId: ownerId,
       petId: values.petId,
-      startTime: startDateTime,
-      endTime: endDateTime,
+      startTime: startUTC,
+      endTime: endUTC,
       metadata: {
         comment: values.comment,
         petName: selectedPetObj?.name,
-        originalTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        originalOffset: timezoneOffset
+        originalTimezone: userTimezone,
       },
     };
 
