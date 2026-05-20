@@ -16,6 +16,7 @@ import { CompleteAppointmentDialog } from "./CompleteAppointmentDialog";
 import { AppointmentFilters } from "./AppointmentFilters";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toZonedTime } from 'date-fns-tz';
 
 interface AppointmentListProps {
   appointments: AppointmentResponse[];
@@ -40,10 +41,10 @@ export function AppointmentList({ appointments, userRole, userId }: AppointmentL
   // Фильтрация для админа
   const filteredAppointments = isAdmin
     ? appointments.filter((a) => {
-        const matchesDoctor = filterDoctorId === "all" || a.doctorId === filterDoctorId;
-        const matchesOwner = filterOwnerId === "all" || a.ownerId === filterOwnerId;
-        return matchesDoctor && matchesOwner;
-      })
+      const matchesDoctor = filterDoctorId === "all" || a.doctorId === filterDoctorId;
+      const matchesOwner = filterOwnerId === "all" || a.ownerId === filterOwnerId;
+      return matchesDoctor && matchesOwner;
+    })
     : appointments;
 
   const upcoming = filteredAppointments.filter(
@@ -76,68 +77,74 @@ export function AppointmentList({ appointments, userRole, userId }: AppointmentL
     }
   };
 
-  const renderAppointmentCard = (appointment: AppointmentResponse) => (
-    <Card key={appointment.id} className="mb-4">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">
-            {format(new Date(appointment.startTime), "d MMMM yyyy", { locale: ru })}
-          </CardTitle>
-          {getStatusBadge(appointment.status)}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-2 text-sm">
-          <div className="flex items-center">
-            <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
-            {format(new Date(appointment.startTime), "HH:mm")} –{" "}
-            {format(new Date(appointment.endTime), "HH:mm")}
+  const renderAppointmentCard = (appointment: AppointmentResponse) => {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const startZoned = toZonedTime(appointment.startTime, timezone);
+    const endZoned = toZonedTime(appointment.endTime, timezone);
+
+    return (
+      <Card key={appointment.id} className="mb-4">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">
+              {format(startZoned, "d MMMM yyyy", { locale: ru })}
+            </CardTitle>
+            {getStatusBadge(appointment.status)}
           </div>
-          {(isDoctor || isAdmin) && (
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-2 text-sm">
+            <div className="flex items-center">
+              <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+              {format(startZoned, "HH:mm")} –{" "}
+              {format(endZoned, "HH:mm")}
+            </div>
+            {(isDoctor || isAdmin) && (
+              <div className="flex items-center">
+                <User className="mr-2 h-4 w-4 text-muted-foreground" />
+                Владелец: {appointment.ownerFullName || "Не указан"}
+              </div>
+            )}
             <div className="flex items-center">
               <User className="mr-2 h-4 w-4 text-muted-foreground" />
-              Владелец: {appointment.ownerFullName || "Не указан"}
+              Врач: {appointment.doctorFullName || "Не назначен"}
             </div>
-          )}
-          <div className="flex items-center">
-            <User className="mr-2 h-4 w-4 text-muted-foreground" />
-            Врач: {appointment.doctorFullName || "Не назначен"}
+            {appointment.petFullName && (
+              <div className="flex items-center">
+                <PawPrint className="mr-2 h-4 w-4 text-muted-foreground" />
+                Питомец: {appointment.petFullName}
+              </div>
+            )}
+            {appointment.metadata?.comment && (
+              <p className="text-muted-foreground mt-2 italic">
+                "{appointment.metadata.comment}"
+              </p>
+            )}
           </div>
-          {appointment.petFullName && (
-            <div className="flex items-center">
-              <PawPrint className="mr-2 h-4 w-4 text-muted-foreground" />
-              Питомец: {appointment.petFullName}
-            </div>
-          )}
-          {appointment.metadata?.comment && (
-            <p className="text-muted-foreground mt-2 italic">
-              "{appointment.metadata.comment}"
-            </p>
-          )}
-        </div>
-        <div className="mt-4 flex justify-end gap-2">
-          {isOwner && appointment.status === "PENDING" && (
-            <Button variant="outline" size="sm" onClick={() => handleCancel(appointment.id)}>
-              <XCircle className="mr-2 h-4 w-4" />
-              Отменить
-            </Button>
-          )}
-          {isDoctor && appointment.status === "PENDING" && (
-            <Button variant="default" size="sm" onClick={() => setCompletingAppointment(appointment)}>
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Завершить приём
-            </Button>
-          )}
-          {isAdmin && (
-            <Button variant="destructive" size="sm" onClick={() => handleCancel(appointment.id)}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Удалить
-            </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+          <div className="mt-4 flex justify-end gap-2">
+            {isOwner && appointment.status === "PENDING" && (
+              <Button variant="outline" size="sm" onClick={() => handleCancel(appointment.id)}>
+                <XCircle className="mr-2 h-4 w-4" />
+                Отменить
+              </Button>
+            )}
+            {isDoctor && appointment.status === "PENDING" && (
+              <Button variant="default" size="sm" onClick={() => setCompletingAppointment(appointment)}>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Завершить приём
+              </Button>
+            )}
+            {isAdmin && (
+              <Button variant="destructive" size="sm" onClick={() => handleCancel(appointment.id)}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Удалить
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <>
@@ -150,17 +157,17 @@ export function AppointmentList({ appointments, userRole, userId }: AppointmentL
             {isDoctor
               ? "Пациенты, записанные к вам"
               : isAdmin
-              ? "Управление всеми записями клиники"
-              : "Управляйте вашими визитами к ветеринарам"}
+                ? "Управление всеми записями клиники"
+                : "Управляйте вашими визитами к ветеринарам"}
           </p>
         </div>
         {isOwner && (
-            <Link href="/appointments/new">
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Записаться
-              </Button>
-            </Link>
+          <Link href="/appointments/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Записаться
+            </Button>
+          </Link>
         )}
       </div>
 

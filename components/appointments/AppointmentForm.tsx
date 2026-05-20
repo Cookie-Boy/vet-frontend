@@ -89,12 +89,8 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
     const startLocalStr = `${dateStr} ${startTime}`;  // "2026-05-20 14:00"
     const endLocalStr = `${dateStr} ${endTime}`;
 
-    console.log("Local Time: " + startLocalStr)
-
     const startUTC = fromZonedTime(startLocalStr, userTimezone);
     const endUTC = fromZonedTime(endLocalStr, userTimezone);
-
-    console.log("UTC Time: " + startUTC)
 
     const appointmentData = {
       doctorId: values.doctorId, // теперь не преобразуем в null, так как null уже может быть
