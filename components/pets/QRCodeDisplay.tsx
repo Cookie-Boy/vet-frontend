@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import axios from "axios";
 
 interface QRCodeDisplayProps {
   petId: string;
@@ -20,25 +21,27 @@ export function QRCodeDisplay({ petId, qrCode }: QRCodeDisplayProps) {
   useEffect(() => {
     if (!session?.accessToken) return;
 
-    // Генерируем URL с токеном авторизации
-    const url = `/api/profile/pets/${petId}/qrcode?width=300&height=300`;
+    const width = 300;
+    const height = 300;
     
-    // Создаем объект URL с токеном в query параметре (если бэкенд поддерживает)
-    // или используем headers через fetch
     const fetchQRCode = async () => {
       try {
-        const response = await fetch(url, {
-          headers: {
-            'Authorization': `Bearer ${session.accessToken}`
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/profile/pets/${petId}/qrcode`,
+          {
+            params: { width, height },
+            headers: {
+              Authorization: `Bearer ${session.accessToken}`,
+            },
+            responseType: 'arraybuffer',
           }
-        });
+        );
         
-        if (!response.ok) {
-          throw new Error(`Failed to load QR code: ${response.status}`);
+        if (!response) {
+          throw new Error(`Failed to load QR code: ${response}`);
         }
         
-        const blob = await response.blob();
-        const imageUrl = URL.createObjectURL(blob);
+        const imageUrl = URL.createObjectURL(response.data);
         setQrImageUrl(imageUrl);
       } catch (err) {
         console.error("Error loading QR code:", err);
