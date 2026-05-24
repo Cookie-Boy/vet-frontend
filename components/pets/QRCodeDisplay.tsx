@@ -37,11 +37,12 @@ export function QRCodeDisplay({ petId, qrCode }: QRCodeDisplayProps) {
           }
         );
         
-        if (!response) {
-          throw new Error(`Failed to load QR code: ${response}`);
+        if (!response?.data) {
+          throw new Error(`Empty response`);
         }
         
-        const imageUrl = URL.createObjectURL(response.data);
+        const blob = new Blob([response.data], { type: 'image/png' });
+        const imageUrl = URL.createObjectURL(blob);
         setQrImageUrl(imageUrl);
       } catch (err) {
         console.error("Error loading QR code:", err);
