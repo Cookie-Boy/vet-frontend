@@ -45,7 +45,7 @@ export function QRCodeDisplay({ petId, qrCode }: QRCodeDisplayProps) {
         setQrImageUrl(imageUrl);
       } catch (err) {
         console.error("Error loading QR code:", err);
-        setError("Не удалось загрузить QR-код");
+        setError("Не удалось загрузить QR-код: " + err);
       }
     };
 
