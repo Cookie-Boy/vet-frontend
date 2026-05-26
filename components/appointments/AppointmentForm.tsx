@@ -29,7 +29,7 @@ const appointmentSchema = z.object({
   petId: z.string().min(1, "Выберите питомца"),
   doctorId: z.string().nullable(),
   date: z.date(),
-  timeSlot: z.string().min(1, "Выберите время"),
+  timeSlot: z.string().optional(),
   comment: z.string().optional(),
 });
 
@@ -59,7 +59,6 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
     },
   });
 
-  // Отслеживаем выбранные значения для отображения имён
   const selectedPetId = form.watch("petId");
   const selectedDoctorId = form.watch("doctorId");
   const selectedPet = pets.find(p => p.id === selectedPetId);
@@ -75,29 +74,28 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
   const onSubmit = async (values: AppointmentFormValues) => {
     console.log("Form values:", values);
 
-    if (!values.timeSlot) {
-      toast.error("Выберите время приёма");
-      return;
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    let startUTC = null;
+    let endUTC = null;
+
+    // Если выбрано конкретное время – преобразуем в UTC
+    if (values.timeSlot) {
+      const [startTime, endTime] = values.timeSlot.split("|");
+      const dateStr = format(values.date, "yyyy-MM-dd");
+      const startLocalStr = `${dateStr} ${startTime}`;
+      const endLocalStr = `${dateStr} ${endTime}`;
+      startUTC = fromZonedTime(startLocalStr, userTimezone);
+      endUTC = fromZonedTime(endLocalStr, userTimezone);
     }
 
-    const [startTime, endTime] = values.timeSlot.split("|");
     const selectedPetObj = pets.find(p => p.id === values.petId);
 
-    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    const dateStr = format(values.date, "yyyy-MM-dd");
-    const startLocalStr = `${dateStr} ${startTime}`;  // "2026-05-20 14:00"
-    const endLocalStr = `${dateStr} ${endTime}`;
-
-    const startUTC = fromZonedTime(startLocalStr, userTimezone);
-    const endUTC = fromZonedTime(endLocalStr, userTimezone);
-
     const appointmentData = {
-      doctorId: values.doctorId, // теперь не преобразуем в null, так как null уже может быть
+      doctorId: values.doctorId,   // может быть null
       ownerId: ownerId,
       petId: values.petId,
-      startTime: startUTC,
-      endTime: endUTC,
+      startTime: startUTC,         // null если время не выбрано
+      endTime: endUTC,             // null если время не выбрано
       metadata: {
         comment: values.comment,
         petName: selectedPetObj?.name,
@@ -127,7 +125,6 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
             value={selectedPetId}
           >
             <SelectTrigger>
-              {/* Отображаем имя питомца вместо ID */}
               {selectedPet ? selectedPet.name : "Выберите питомца"}
             </SelectTrigger>
             <SelectContent>
@@ -154,7 +151,6 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
             onValueChange={(val) => form.setValue("doctorId", val === "any" ? null : val)}
           >
             <SelectTrigger>
-              {/* Отображаем ФИО врача или "Любой врач" */}
               {selectedDoctorId === null
                 ? "Любой врач"
                 : selectedDoctor
@@ -211,7 +207,7 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
 
           {date && (
             <div>
-              <Label>Доступное время</Label>
+              <Label>Доступное время (необязательно)</Label>
               {slotsLoading ? (
                 <p className="text-sm text-muted-foreground">Загрузка...</p>
               ) : correctSlots && correctSlots.length > 0 ? (
@@ -231,9 +227,7 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
               ) : (
                 <p className="text-sm text-muted-foreground">Нет доступных слотов на выбранную дату</p>
               )}
-              {form.formState.errors.timeSlot && (
-                <p className="text-sm text-destructive mt-1">{form.formState.errors.timeSlot.message}</p>
-              )}
+              {/* Сообщение об ошибке не выводим, т.к. поле необязательное */}
             </div>
           )}
         </CardContent>
