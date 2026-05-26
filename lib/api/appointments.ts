@@ -60,9 +60,15 @@ export const appointmentsApi = {
       await apiClient.delete(`/api/appointment/${id}`);
     },
     getAvailableSlots: async (doctorId: string | null, date: string): Promise<{ startTime: string; endTime: string }[]> => {
+      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const params: any = { date };
       if (doctorId) params.doctorId = doctorId;
-      const response = await apiClient.get("/api/appointment/slots", { params });
+      const response = await apiClient.get("/api/appointment/slots", {
+        params,
+        headers: {
+          'X-Timezone': userTimezone,
+        },
+      });
       return response.data;
     },
   },
