@@ -16,14 +16,17 @@ interface DoctorListWithFiltersProps {
 export function DoctorListWithFilters({ clinics, isAdmin }: DoctorListWithFiltersProps) {
   const [selectedClinicId, setSelectedClinicId] = useState<string | null>(null);
   const { data: doctors, isLoading } = useDoctorsByClinic(selectedClinicId === "all" ? null : selectedClinicId);
+  const selectedClinic = clinics.find(c => c.id === selectedClinicId);
 
   return (
     <>
       <div className="mb-4 w-64">
         <Label>Фильтр по клинике</Label>
         <Select value={selectedClinicId} onValueChange={setSelectedClinicId}>
-          <SelectTrigger>
-            <SelectValue placeholder="Все клиники" />
+          <SelectTrigger className="w-64">
+            <SelectValue>
+                {selectedClinic ? selectedClinic.name : "Все клиники"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Все клиники</SelectItem>
