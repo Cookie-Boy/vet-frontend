@@ -48,7 +48,10 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
 
   const { data: clinics } = useClinics();
   const clinicId = selectedClinicId === "all" ? null : selectedClinicId;
-  const { data: doctors } = useDoctorsByClinic(clinicId);
+  const { data: doctors } = useDoctorsByClinic(
+    clinicId,
+    { enabled: !!clinicId } // загружаем только если выбрана конкретная клиника
+  );
   const createAppointment = useCreateAppointment();
 
   const form = useForm<AppointmentFormValues>({
@@ -172,26 +175,30 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
           <CardTitle>Выберите врача</CardTitle>
         </CardHeader>
         <CardContent>
-          <Select
-            value={selectedDoctorId || "any"}
-            onValueChange={(val) => form.setValue("doctorId", val === "any" ? null : val)}
-          >
-            <SelectTrigger>
-              {selectedDoctorId === null
-                ? "Любой врач"
-                : selectedDoctor
-                ? `${selectedDoctor.lastName} ${selectedDoctor.firstName}`
-                : "Выберите врача"}
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="any">Любой врач</SelectItem>
-              {doctors?.map((doc) => (
-                <SelectItem key={doc.id} value={doc.id}>
-                  {doc.lastName} {doc.firstName} – {doc.specialization}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {!clinicId ? (
+            <p className="text-sm text-muted-foreground">Сначала выберите клинику</p>
+          ) : (
+            <Select
+              value={selectedDoctorId || "any"}
+              onValueChange={(val) => form.setValue("doctorId", val === "any" ? null : val)}
+            >
+              <SelectTrigger>
+                {selectedDoctorId === null
+                  ? "Любой врач"
+                  : selectedDoctor
+                  ? `${selectedDoctor.lastName} ${selectedDoctor.firstName}`
+                  : "Выберите врача"}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">Любой врач</SelectItem>
+                {doctors?.map((doc) => (
+                  <SelectItem key={doc.id} value={doc.id}>
+                    {doc.lastName} {doc.firstName} – {doc.specialization}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </CardContent>
       </Card>
 

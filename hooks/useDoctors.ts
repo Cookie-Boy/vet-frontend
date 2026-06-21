@@ -1,5 +1,5 @@
 // hooks/useDoctors.ts
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { doctorsApi } from "@/lib/api/doctors";
 import { DoctorRequest, DoctorResponse } from "@/types/doctor";
 import apiClient from "@/lib/api/client";
@@ -50,17 +50,21 @@ export const useDeleteDoctor = () => {
   });
 };
 
-export const useDoctorsByClinic = (clinicId: string | null) => {
+export const useDoctorsByClinic = (
+  clinicId: string | null,
+  options?: Omit<UseQueryOptions<DoctorResponse[]>, "queryKey" | "queryFn">
+) => {
   return useQuery({
     queryKey: ["doctors", clinicId],
-    queryFn: async (): Promise<DoctorResponse[]> => {
-      if (clinicId) {
-        const response = await apiClient.get(`/api/management/doctors/clinic/${clinicId}`);
-        return response.data;
-      } else {
-        const response = await apiClient.get("/api/management/doctors");
-        return response.data;
+    queryFn: async () => {
+      if (!clinicId) {
+        // Если clinicId нет, возвращаем пустой массив (но запрос не выполнится из-за enabled)
+        return [];
       }
+      const response = await apiClient.get(`/api/management/doctors/clinic/${clinicId}`);
+      return response.data;
     },
+    enabled: !!clinicId, // запрос выполняется только когда clinicId не null/undefined
+    ...options,
   });
 };
