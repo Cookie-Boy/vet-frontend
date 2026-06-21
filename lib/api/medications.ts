@@ -6,9 +6,10 @@ import { createServerApiClient } from "./server-client";
 export const medicationsApi = {
   // Серверные методы (для Server Components)
   server: {
-    getAll: async (): Promise<MedicationResponse[]> => {
+    getAll: async (clinicId?: string): Promise<MedicationResponse[]> => {
       const client = await createServerApiClient();
-      const response = await client.get("/api/management/medicines");
+      const path = clinicId ? ("/clinic/" + clinicId) : ""
+      const response = await client.get("/api/management/medicines" + path);
       return response.data;
     },
     getById: async (id: string): Promise<MedicationResponse> => {
@@ -20,8 +21,9 @@ export const medicationsApi = {
 
   // Клиентские методы (для Client Components)
   client: {
-    getAll: async (): Promise<MedicationResponse[]> => {
-      const response = await apiClient.get("/api/management/medicines");
+    getAll: async (clinicId?: string): Promise<MedicationResponse[]> => {
+      const path = clinicId ? ("/clinic/" + clinicId) : ""
+      const response = await apiClient.get("/api/management/medicines" + path);
       return response.data;
     },
     getById: async (id: string): Promise<MedicationResponse> => {

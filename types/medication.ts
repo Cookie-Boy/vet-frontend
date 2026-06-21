@@ -1,4 +1,5 @@
 export interface MedicationRequest {
+  clinicId?: string;
   name: string;
   description?: string;
   manufacturer: string;
@@ -13,6 +14,8 @@ export interface MedicationRequest {
 
 export interface MedicationResponse {
   id: string;
+  clinicId?: string;
+  clinicName?: string;
   name: string;
   description?: string;
   manufacturer: string;

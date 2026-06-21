@@ -10,6 +10,14 @@ export const useMedications = () => {
   });
 };
 
+export const useMedicationsByClinic = (clinicId: string | null) => {
+  return useQuery({
+    queryKey: ["medications", clinicId],
+    queryFn: () => medicationsApi.client.getAll(clinicId ?? undefined),
+    enabled: true, // загружаем всегда, при null вернутся все лекарства
+  });
+};
+
 export const useMedication = (id?: string) => {
   return useQuery({
     queryKey: ["medication", id],

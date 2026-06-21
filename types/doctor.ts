@@ -67,6 +67,8 @@ export interface DoctorRequest {
 
 export interface DoctorResponse {
   id: string;
+  clinicId?: string;
+  clinicName?: string;
   firstName: string;
   lastName: string;
   middleName?: string;

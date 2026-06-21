@@ -2,6 +2,7 @@
 import { z } from "zod";
 
 export const medicationFormSchema = z.object({
+  clinicId: z.string().optional(),
   name: z.string().min(1, "Название обязательно"),
   description: z.string().optional(),
   manufacturer: z.string().min(1, "Производитель обязателен"),

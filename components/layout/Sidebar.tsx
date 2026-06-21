@@ -12,6 +12,7 @@ import {
   Activity,
   User,
   Menu,
+  Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ export default function Sidebar() {
     { name: "Питомцы", href: "/pets", icon: PawPrint, alwaysShow: true },
     { name: "Записи", href: "/appointments", icon: Calendar, alwaysShow: false, requireDefaultUser: true},
     { name: "Приёмы", href: "/appointments", icon: Calendar, alwaysShow: false, requireAdminOrDoctor: true },
+    { name: "Клиники", href: "/clinics", icon: Building2, alwaysShow: false, requireAdmin: true },
     { name: "Врачи", href: "/doctors", icon: Stethoscope, alwaysShow: true },
     { name: "Лекарства", href: "/medications", icon: Pill, alwaysShow: false, requireAdmin: true },
     { name: "Здоровье", href: "/health", icon: Activity, alwaysShow: true },

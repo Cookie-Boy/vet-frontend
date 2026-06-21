@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Mail, Phone, Stethoscope, Edit, Trash2, Eye } from "lucide-react";
+import { Calendar, Mail, Phone, Stethoscope, Edit, Trash2, Eye, Building2 } from "lucide-react";
 import { DoctorResponse, getSpecializationLabel } from "@/types/doctor";
 import Link from "next/link";
 import { useState } from "react";
@@ -53,6 +53,12 @@ export function DoctorCard({ doctor, isAdmin }: DoctorCardProps) {
             <Stethoscope className="mr-1 h-3 w-3" />
             {getSpecializationLabel(doctor.specialization)}
           </div>
+          {doctor.clinicName && (
+            <div className="flex items-center text-sm text-muted-foreground mt-1">
+              <Building2 className="mr-1 h-3 w-3" />
+              {doctor.clinicName}
+            </div>
+          )}
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <div className="flex items-center">

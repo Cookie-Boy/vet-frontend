@@ -15,12 +15,15 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { MedicationResponse } from "@/types/medication";
 import { useState } from "react";
+import { useClinics } from "@/hooks/useClinics";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface MedicationFormProps {
   initialData?: MedicationResponse;
 }
 
 export function MedicationForm({ initialData }: MedicationFormProps) {
+  const { data: clinics } = useClinics();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const createMedication = useCreateMedication();
@@ -29,6 +32,7 @@ export function MedicationForm({ initialData }: MedicationFormProps) {
   const form = useForm<MedicationFormValues>({
     resolver: zodResolver(medicationFormSchema),
     defaultValues: {
+      clinicId: initialData?.clinicId || "none",
       name: initialData?.name || "",
       description: initialData?.description || "",
       manufacturer: initialData?.manufacturer || "ВетПлатформа",
@@ -84,6 +88,23 @@ export function MedicationForm({ initialData }: MedicationFormProps) {
               <Label htmlFor="manufacturer">Производитель *</Label>
               <Input id="manufacturer" {...register("manufacturer")} />
               {errors.manufacturer && <p className="text-sm text-destructive">{errors.manufacturer.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="clinicId">Клиника</Label>
+              <Select
+                onValueChange={(val) => setValue("clinicId", val === "none" || val == null ? undefined : val)}
+                defaultValue={watch("clinicId") || "none"}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите клинику" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Без клиники</SelectItem>
+                  {clinics?.map((clinic) => (
+                    <SelectItem key={clinic.id} value={clinic.id}>{clinic.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="batchNumber">Номер партии *</Label>

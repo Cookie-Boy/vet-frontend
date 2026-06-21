@@ -7,7 +7,7 @@ import { reviewsApi } from "@/lib/api/reviews";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Mail, Phone, Stethoscope, Star, ArrowLeft } from "lucide-react";
+import { Calendar, Mail, Phone, Stethoscope, Star, ArrowLeft, Building2 } from "lucide-react";
 import Link from "next/link";
 import { ReviewForm } from "@/components/doctors/ReviewForm";
 
@@ -44,6 +44,12 @@ export default async function DoctorDetailPage({ params }: PageProps) {
             <Stethoscope className="mr-1 h-4 w-4" />
             {doctor.specialization}
           </p>
+          {doctor.clinicName && (
+            <div className="flex items-center">
+              <Building2 className="mr-2 h-4 w-4" />
+              {doctor.clinicName}
+            </div>
+          )}
           {avgRating && (
             <div className="flex items-center mt-1">
               <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />

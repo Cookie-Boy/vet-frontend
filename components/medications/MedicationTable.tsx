@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, AlertTriangle } from "lucide-react";
+import { Edit, Trash2, AlertTriangle, Building2 } from "lucide-react";
 import { MedicationResponse } from "@/types/medication";
 import { useDeleteMedication } from "@/hooks/useMedications";
 import { toast } from "sonner";
@@ -66,6 +66,7 @@ export function MedicationTable({ medications, isAdmin = true }: MedicationTable
             <TableRow>
               <TableHead>Название</TableHead>
               <TableHead>Производитель</TableHead>
+              <TableHead>Клиника</TableHead>
               <TableHead>Количество</TableHead>
               <TableHead>Мин. остаток</TableHead>
               <TableHead>Цена</TableHead>
@@ -87,6 +88,14 @@ export function MedicationTable({ medications, isAdmin = true }: MedicationTable
                   <TableRow key={med.id}>
                     <TableCell className="font-medium">{med.name}</TableCell>
                     <TableCell>{med.manufacturer}</TableCell>
+                    <TableCell>
+                      {med.clinicName ? (
+                        <span className="flex items-center gap-1">
+                          <Building2 className="h-3 w-3" />
+                          {med.clinicName}
+                        </span>
+                      ) : "—"}
+                    </TableCell>
                     <TableCell>{med.quantityInStock}</TableCell>
                     <TableCell>{med.minStockLevel}</TableCell>
                     <TableCell>{formatPrice(med.pricePerUnit)}</TableCell>

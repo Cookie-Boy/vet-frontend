@@ -1,7 +1,8 @@
 // hooks/useDoctors.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { doctorsApi } from "@/lib/api/doctors";
-import { DoctorRequest } from "@/types/doctor";
+import { DoctorRequest, DoctorResponse } from "@/types/doctor";
+import apiClient from "@/lib/api/client";
 
 export const useDoctors = () => {
   return useQuery({
@@ -45,6 +46,21 @@ export const useDeleteDoctor = () => {
     mutationFn: (id: string) => doctorsApi.client.remove(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["doctors"] });
+    },
+  });
+};
+
+export const useDoctorsByClinic = (clinicId: string | null) => {
+  return useQuery({
+    queryKey: ["doctors", clinicId],
+    queryFn: async (): Promise<DoctorResponse[]> => {
+      if (clinicId) {
+        const response = await apiClient.get(`/api/management/doctors/clinic/${clinicId}`);
+        return response.data;
+      } else {
+        const response = await apiClient.get("/api/management/doctors");
+        return response.data;
+      }
     },
   });
 };
