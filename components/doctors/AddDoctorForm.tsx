@@ -1,4 +1,3 @@
-// components/doctors/AddDoctorForm.tsx
 "use client";
 
 import { useState, useCallback } from "react";
@@ -16,8 +15,10 @@ import { useRouter } from "next/navigation";
 import { DoctorResponse, Specialization, DoctorRequest, getSpecializationLabel } from "@/types/doctor";
 import { useCreateDoctor, useUpdateDoctor } from "@/hooks/useDoctors";
 import { useUserSearch, UserSearchResult } from "@/hooks/useUserSearch";
+import { useClinics } from "@/hooks/useClinics"; // <-- новый импорт
 import { debounce } from "lodash";
 
+// Добавлено поле clinicId (опционально)
 const doctorFormSchema = z.object({
   userId: z.string().min(1, "Пользователь не выбран"),
   specialization: z.nativeEnum(Specialization),
@@ -25,6 +26,7 @@ const doctorFormSchema = z.object({
   startWorkingDay: z.string().regex(/^\d{2}:\d{2}:\d{2}$/, "Формат ЧЧ:ММ:СС"),
   endWorkingDay: z.string().regex(/^\d{2}:\d{2}:\d{2}$/, "Формат ЧЧ:ММ:СС"),
   bio: z.string().optional(),
+  clinicId: z.string().optional(), // <-- новое поле
 });
 
 type DoctorFormValues = z.infer<typeof doctorFormSchema>;
@@ -51,6 +53,7 @@ export function AddDoctorForm({ initialData }: AddDoctorFormProps) {
   );
 
   const { data: searchResults = [], isFetching } = useUserSearch(debouncedSearch);
+  const { data: clinics = [] } = useClinics(); // <-- получаем список клиник
 
   const createDoctor = useCreateDoctor();
   const updateDoctor = useUpdateDoctor(initialData?.id || "");
@@ -64,12 +67,14 @@ export function AddDoctorForm({ initialData }: AddDoctorFormProps) {
       startWorkingDay: initialData?.startWorkingDay || "09:00:00",
       endWorkingDay: initialData?.endWorkingDay || "18:00:00",
       bio: initialData?.bio || "",
+      clinicId: initialData?.clinicId || "", // <-- предзаполнение
     },
   });
 
   const { register, handleSubmit, formState: { errors }, setValue, watch } = form;
   
   const selectedSpecialization = watch("specialization");
+  const selectedClinicId = watch("clinicId"); // <-- для отображения выбранной клиники
 
   // Debounce поиска
   const debouncedSearchFn = useCallback(
@@ -98,9 +103,6 @@ export function AddDoctorForm({ initialData }: AddDoctorFormProps) {
       return;
     }
 
-    console.log("Selected user:", selectedUser);
-    console.log("Selected user email:", selectedUser.email);
-
     setIsLoading(true);
     try {
       const payload: DoctorRequest = {
@@ -115,6 +117,7 @@ export function AddDoctorForm({ initialData }: AddDoctorFormProps) {
         startWorkingDay: values.startWorkingDay,
         endWorkingDay: values.endWorkingDay,
         bio: values.bio,
+        clinicId: values.clinicId || undefined, // <-- передаём, если выбрана
       };
       if (initialData) {
         await updateDoctor.mutateAsync(payload);
@@ -137,6 +140,7 @@ export function AddDoctorForm({ initialData }: AddDoctorFormProps) {
       <Card>
         <CardHeader><CardTitle>Поиск пользователя</CardTitle></CardHeader>
         <CardContent className="space-y-4">
+          {/* ... тот же поиск, что и был ... */}
           <div className="relative">
             <Input
               placeholder="Введите email или имя пользователя"
@@ -215,6 +219,25 @@ export function AddDoctorForm({ initialData }: AddDoctorFormProps) {
               <Label htmlFor="endWorkingDay">Конец рабочего дня *</Label>
               <Input id="endWorkingDay" type="time" step="1" {...register("endWorkingDay")} />
               {errors.endWorkingDay && <p className="text-sm text-destructive">{errors.endWorkingDay.message}</p>}
+            </div>
+            {/* Новый блок выбора клиники */}
+            <div>
+              <Label htmlFor="clinicId">Клиника</Label>
+              <Select 
+                value={selectedClinicId || "none"}
+                onValueChange={(val) => setValue("clinicId", val === "none" || val == null ? undefined : val)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите клинику" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Без клиники</SelectItem>
+                  {clinics.map((clinic) => (
+                    <SelectItem key={clinic.id} value={clinic.id}>{clinic.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.clinicId && <p className="text-sm text-destructive">{errors.clinicId.message}</p>}
             </div>
           </div>
           <div>

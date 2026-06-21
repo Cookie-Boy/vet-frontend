@@ -52,6 +52,7 @@ export const parseSpecialization = (value: string): Specialization => {
 
 export interface DoctorRequest {
   id: string;
+  clinicId?: string;
   firstName: string;
   lastName: string;
   middleName?: string;
