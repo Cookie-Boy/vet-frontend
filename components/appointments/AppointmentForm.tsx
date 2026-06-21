@@ -1,4 +1,3 @@
-// components/appointments/AppointmentForm.tsx
 "use client";
 
 import { useState } from "react";
@@ -22,7 +21,8 @@ import { useAvailableSlots, useCreateAppointment } from "@/hooks/useAppointments
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { UUID } from "crypto";
-import { useDoctors } from "@/hooks/useDoctors";
+import { useClinics } from "@/hooks/useClinics";
+import { useDoctorsByClinic } from "@/hooks/useDoctors";
 import { fromZonedTime } from 'date-fns-tz';
 
 const appointmentSchema = z.object({
@@ -44,8 +44,11 @@ interface AppointmentFormProps {
 export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: AppointmentFormProps) {
   const router = useRouter();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  
-  const { data: doctors } = useDoctors();
+  const [selectedClinicId, setSelectedClinicId] = useState<string | null>("all");
+
+  const { data: clinics } = useClinics();
+  const clinicId = selectedClinicId === "all" ? null : selectedClinicId;
+  const { data: doctors } = useDoctorsByClinic(clinicId);
   const createAppointment = useCreateAppointment();
 
   const form = useForm<AppointmentFormValues>({
@@ -78,7 +81,6 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
     let startUTC = null;
     let endUTC = null;
 
-    // Если выбрано конкретное время – преобразуем в UTC
     if (values.timeSlot) {
       const [startTime, endTime] = values.timeSlot.split("|");
       const dateStr = format(values.date, "yyyy-MM-dd");
@@ -91,11 +93,12 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
     const selectedPetObj = pets.find(p => p.id === values.petId);
 
     const appointmentData = {
-      doctorId: values.doctorId,   // может быть null
+      doctorId: values.doctorId,
       ownerId: ownerId,
       petId: values.petId,
-      startTime: startUTC,         // null если время не выбрано
-      endTime: endUTC,             // null если время не выбрано
+      startTime: startUTC,
+      endTime: endUTC,
+      clinicId: selectedClinicId === "all" ? null : selectedClinicId,
       metadata: {
         comment: values.comment,
         petName: selectedPetObj?.name,
@@ -138,6 +141,29 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
           {form.formState.errors.petId && (
             <p className="text-sm text-destructive mt-1">{form.formState.errors.petId.message}</p>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Выберите клинику</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Select value={selectedClinicId} onValueChange={setSelectedClinicId}></Select>
+          <Select value={selectedClinicId} onValueChange={(val) => {
+            setSelectedClinicId(val);
+            form.setValue("doctorId", null); // сброс врача при смене клиники
+          }}>
+            <SelectTrigger>
+              <SelectValue placeholder="Выберите клинику" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Все клиники</SelectItem>
+              {clinics?.map((clinic) => (
+                <SelectItem key={clinic.id} value={clinic.id}>{clinic.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </CardContent>
       </Card>
 
@@ -227,7 +253,6 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
               ) : (
                 <p className="text-sm text-muted-foreground">Нет доступных слотов на выбранную дату</p>
               )}
-              {/* Сообщение об ошибке не выводим, т.к. поле необязательное */}
             </div>
           )}
         </CardContent>
