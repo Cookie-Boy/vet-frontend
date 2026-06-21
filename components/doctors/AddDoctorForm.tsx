@@ -224,14 +224,14 @@ export function AddDoctorForm({ initialData }: AddDoctorFormProps) {
             <div>
               <Label htmlFor="clinicId">Клиника</Label>
               <Select 
-                value={selectedClinicId || "none"}
-                onValueChange={(val) => setValue("clinicId", val === "none" || val == null ? undefined : val)}
+                value={selectedClinicId || "Отсутствует"}
+                onValueChange={(val) => setValue("clinicId", val === "Отсутствует" || val == null ? undefined : val)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Выберите клинику" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Без клиники</SelectItem>
+                  <SelectItem value="Отсутствует">Без клиники</SelectItem>
                   {clinics.map((clinic) => (
                     <SelectItem key={clinic.id} value={clinic.id}>{clinic.name}</SelectItem>
                   ))}

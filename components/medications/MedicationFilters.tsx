@@ -31,7 +31,9 @@ export function MedicationFilters() {
             <SelectContent>
               <SelectItem value="all">Все клиники</SelectItem>
               {clinics?.map((clinic) => (
-                <SelectItem key={clinic.id} value={clinic.id}>{clinic.name}</SelectItem>
+                <SelectItem key={clinic.id} value={String(clinic.id)}>
+                    {clinic.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
