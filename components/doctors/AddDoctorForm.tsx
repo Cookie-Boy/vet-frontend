@@ -74,7 +74,8 @@ export function AddDoctorForm({ initialData }: AddDoctorFormProps) {
   const { register, handleSubmit, formState: { errors }, setValue, watch } = form;
   
   const selectedSpecialization = watch("specialization");
-  const selectedClinicId = watch("clinicId"); // <-- для отображения выбранной клиники
+  const selectedClinicId = watch("clinicId");
+  const selectedClinic = clinics.find(c => c.id === selectedClinicId);
 
   // Debounce поиска
   const debouncedSearchFn = useCallback(
@@ -227,8 +228,10 @@ export function AddDoctorForm({ initialData }: AddDoctorFormProps) {
                 value={selectedClinicId || "Отсутствует"}
                 onValueChange={(val) => setValue("clinicId", val === "Отсутствует" || val == null ? undefined : val)}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите клинику" />
+                <SelectTrigger className="w-64">
+                  <SelectValue>
+                      {selectedClinic ? selectedClinic.name : "Выберите клинику"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Отсутствует">Без клиники</SelectItem>

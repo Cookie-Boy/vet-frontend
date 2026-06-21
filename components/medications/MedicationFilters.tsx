@@ -16,6 +16,7 @@ export function MedicationFilters() {
 
   const clinicId = selectedClinicId === "all" ? null : selectedClinicId;
   const { data: medications, isLoading } = useMedicationsByClinic(clinicId);
+  const selectedClinic = clinics?.find(c => c.id === selectedClinicId);
 
   if (isLoading) return <p className="text-muted-foreground">Загрузка...</p>;
 
@@ -26,7 +27,9 @@ export function MedicationFilters() {
           <Label>Фильтр по клинике</Label>
           <Select value={selectedClinicId} onValueChange={setSelectedClinicId}>
             <SelectTrigger className="w-64">
-              <SelectValue placeholder="Все клиники" />
+                <SelectValue>
+                    {selectedClinic ? selectedClinic.name : "Все клиники"}
+                </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Все клиники</SelectItem>
