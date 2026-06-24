@@ -23,7 +23,7 @@ const nextConfig: NextConfig = {
 };
 
 module.exports = {
-  allowedDevOrigins: ['drdwut-95-104-185-219.ru.tuna.am'],
+  allowedDevOrigins: ['hrn0ue-95-104-185-219.ru.tuna.am'],
 }
 
 export default nextConfig;
