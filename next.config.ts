@@ -17,11 +17,7 @@ const nextConfig: NextConfig = {
       {
         source: '/api/:path*',
         destination: 'http://192.168.1.114:8888/api/:path*', // Gateway
-      },
-      {
-        source: '/auth/:path*',
-        destination: 'http://192.168.1.114:8080/:path*', // Keycloak
-      },
+      }
     ];
   },
 };
