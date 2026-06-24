@@ -12,6 +12,18 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://192.168.1.114:8888/api/:path*', // Gateway
+      },
+      {
+        source: '/auth/:path*',
+        destination: 'http://192.168.1.114:8080/:path*', // Keycloak
+      },
+    ];
+  },
 };
 
 export default nextConfig;
