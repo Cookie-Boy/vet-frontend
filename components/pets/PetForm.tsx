@@ -56,6 +56,17 @@ export function PetForm({ ownerId, initialData }: PetFormProps) {
     },
   });
 
+  const breedLabels: Record<string, string> = {
+    persian: "Персидская",
+    siamese: "Сиамская",
+    maine_coon: "Мейн-кун",
+    british: "Британская",
+    labrador: "Лабрадор",
+    german_shepherd: "Немецкая овчарка",
+    bulldog: "Бульдог",
+    poodle: "Пудель",
+  };
+
   const { register, formState: { errors }, watch, setValue, handleSubmit } = methods;
   const selectedSpecies = watch("species");
 
@@ -116,26 +127,24 @@ export function PetForm({ ownerId, initialData }: PetFormProps) {
                   </div>
                   <div>
                     <Label htmlFor="breed">Порода *</Label>
-                    <Select onValueChange={(val) => { if (val) setValue("breed", val); }} defaultValue={methods.getValues("breed")}>
+                    <Select
+                      onValueChange={(val) => { if (val) setValue("breed", val); }}
+                      value={watch("breed")}
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder="Выберите породу" />
+                        <SelectValue placeholder="Выберите породу">
+                          {watch("breed") ? breedLabels[watch("breed")] || watch("breed") : "Выберите породу"}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
-                        {selectedSpecies === "cat" ? (
-                          <>
-                            <SelectItem value="persian">Персидская</SelectItem>
-                            <SelectItem value="siamese">Сиамская</SelectItem>
-                            <SelectItem value="maine_coon">Мейн-кун</SelectItem>
-                            <SelectItem value="british">Британская</SelectItem>
-                          </>
-                        ) : (
-                          <>
-                            <SelectItem value="labrador">Лабрадор</SelectItem>
-                            <SelectItem value="german_shepherd">Немецкая овчарка</SelectItem>
-                            <SelectItem value="bulldog">Бульдог</SelectItem>
-                            <SelectItem value="poodle">Пудель</SelectItem>
-                          </>
-                        )}
+                        {(selectedSpecies === "cat"
+                          ? ["persian", "siamese", "maine_coon", "british"]
+                          : ["labrador", "german_shepherd", "bulldog", "poodle"]
+                        ).map((code) => (
+                          <SelectItem key={code} value={code}>
+                            {breedLabels[code]}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     {errors.breed && <p className="text-sm text-destructive">{errors.breed.message}</p>}

@@ -30,7 +30,7 @@ export const petFormSchema = z.object({
   ownerId: z.string(),
   name: z.string().min(1, "Имя обязательно"),
   species: z.enum(["cat", "dog"]),
-  age: z.number().min(0, "Возраст не может быть отрицательным"),
+  age: z.number().min(0, "Возраст не может быть отрицательным").max(50, "Слишком большой возраст"),
   breed: z.string().min(1, "Порода обязательна"),
   chipNumber: z.string().optional(),
   medicalRecord: medicalRecordSchema.optional(),
