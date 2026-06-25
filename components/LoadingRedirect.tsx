@@ -9,10 +9,10 @@ interface LoadingRedirectProps {
   delay?: number;
 }
 
-export default function LoadingRedirect({ to, delay = 1000 }: LoadingRedirectProps) {
+export default function LoadingRedirect({ to, delay = 500 }: LoadingRedirectProps) {
   useEffect(() => {
     const timer = setTimeout(() => {
-      window.location.href = to; // или router.push(to) если не нужна перезагрузка
+      window.location.href = to;
     }, delay);
 
     return () => clearTimeout(timer);
