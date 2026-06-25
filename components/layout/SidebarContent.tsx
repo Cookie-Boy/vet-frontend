@@ -43,7 +43,7 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
             <Link key={item.name} href={item.href} onClick={onNavigate}>
               <Button
                 variant={isActive ? "secondary" : "ghost"}
-                className={cn("w-full justify-start", isActive && "bg-secondary")}
+                className={cn("w-full justify-start cursor-pointer", isActive && "bg-secondary")}
               >
                 <item.icon className="mr-2 h-4 w-4" />
                 {item.name}
