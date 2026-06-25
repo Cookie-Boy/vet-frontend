@@ -128,3 +128,9 @@
     @apply font-sans;
   }
 }
+
+button:not(:disabled),
+a,
+[role="button"]:not(:disabled) {
+  cursor: pointer;
+}
