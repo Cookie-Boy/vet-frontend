@@ -12,18 +12,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://192.168.1.114:8888/api/:path*', // Gateway
-      }
-    ];
-  },
 };
 
 module.exports = {
-  allowedDevOrigins: ['vet-platform.cloudpub.ru'],
+  allowedDevOrigins: ['vet-platform.cloudpub.ru', 'vet-gateway.cloudpub.ru'],
 }
 
 export default nextConfig;
