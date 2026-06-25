@@ -82,7 +82,7 @@ export default function Header() {
                     <p className="text-xs text-muted-foreground">{userEmail}</p>
                   </div>
                   <button
-                    className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 !cursor-pointer"
                     onClick={() => {
                       setMenuOpen(false);
                       router.push("/profile");
@@ -92,7 +92,7 @@ export default function Header() {
                     Профиль
                   </button>
                   <button
-                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer"
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 !cursor-pointer"
                     onClick={() => {
                       setMenuOpen(false);
                       signOut({ callbackUrl: "/login" });
