@@ -18,6 +18,9 @@ COPY . .
 # Отключаем телеметрию Next.js
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Добавляем настройки для standalone сборки
+ENV NEXT_OUTPUT=standalone
+
 RUN npm run build
 
 # 3. Production образ
@@ -32,11 +35,10 @@ RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
 
-# Автоматически создаём правильные права для кеша
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
+# Создаем директорию для статики и кеша
+RUN mkdir -p .next/static
+RUN chown -R nextjs:nodejs .next
 
-# Копируем собранное приложение
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
@@ -45,5 +47,6 @@ USER nextjs
 EXPOSE 3000
 
 ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 
 CMD ["node", "server.js"]

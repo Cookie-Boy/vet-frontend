@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  reactStrictMode: true,
+  devIndicators: {
+    position: undefined,
+  },
+  poweredByHeader: false,
   images: {
     remotePatterns: [
       {
