@@ -17,10 +17,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-};
-
-module.exports = {
   allowedDevOrigins: ['vet-platform.cloudpub.ru', 'vet-gateway.cloudpub.ru'],
-}
+};
 
 export default nextConfig;

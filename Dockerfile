@@ -18,9 +18,6 @@ COPY . .
 # Отключаем телеметрию Next.js
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Добавляем настройки для standalone сборки
-ENV NEXT_OUTPUT=standalone
-
 RUN npm run build
 
 # 3. Production образ
