@@ -11,7 +11,16 @@ interface PetCardProps {
   pet: PetResponse;
 }
 
-// ??? Почему не отображается pet.name?
+const breedLabels: Record<string, string> = {
+  persian: "Персидская",
+  siamese: "Сиамская",
+  maine_coon: "Мейн-кун",
+  british: "Британская",
+  labrador: "Лабрадор",
+  german_shepherd: "Немецкая овчарка",
+  bulldog: "Бульдог",
+  poodle: "Пудель",
+};
 
 export function PetCard({ pet }: PetCardProps) {
   return (
@@ -22,7 +31,7 @@ export function PetCard({ pet }: PetCardProps) {
       </CardHeader>
       <CardContent>
         <div className="text-sm text-muted-foreground">
-          {pet.species === "cat" ? "Кошка" : "Собака"} • {pet.breed}
+          {pet.species === "cat" ? "Кошка" : "Собака"} • {breedLabels[pet.breed] || pet.breed}
         </div>
         <div className="text-sm text-muted-foreground">
           Возраст: {pet.age} {pet.age === 1 ? "год" : pet.age < 5 ? "года" : "лет"}

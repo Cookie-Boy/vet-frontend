@@ -12,6 +12,17 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+const breedLabels: Record<string, string> = {
+  persian: "Персидская",
+  siamese: "Сиамская",
+  maine_coon: "Мейн-кун",
+  british: "Британская",
+  labrador: "Лабрадор",
+  german_shepherd: "Немецкая овчарка",
+  bulldog: "Бульдог",
+  poodle: "Пудель",
+};
+
 export default async function PetDetailPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/login");
@@ -29,7 +40,7 @@ export default async function PetDetailPage({ params }: { params: { id: string }
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">
-        {pet.species} ({pet.breed})
+        {pet.name} – {pet.species === "cat" ? "Кошка" : pet.species === "dog" ? "Собака" : pet.species} ({breedLabels[pet.breed] || pet.breed})
       </h1>
       <Tabs defaultValue="info">
         <TabsList>
