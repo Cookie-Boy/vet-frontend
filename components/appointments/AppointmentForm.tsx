@@ -1,7 +1,6 @@
 // components/appointments/AppointmentForm.tsx
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,6 +25,7 @@ import { useClinics } from "@/hooks/useClinics";
 import { useDoctorsByClinic } from "@/hooks/useDoctors";
 import { fromZonedTime } from 'date-fns-tz';
 import { getSpecializationLabel } from "@/types/doctor";
+import { useState, useMemo } from "react";
 
 // Русские названия пород и видов
 const breedLabels: Record<string, string> = {
@@ -42,10 +42,10 @@ const speciesLabels: Record<string, string> = {
 const appointmentSchema = z.object({
   petId: z.string().min(1, "Выберите питомца"),
   doctorId: z.string().nullable(),
-  date: z.date().refine(
-    (date) => date >= startOfDay(new Date()),
-    { message: "Нельзя выбрать дату в прошлом" }
-  ),
+  date: z.date().refine((d) => {
+    const todayStart = startOfDay(new Date()); // локальное начало дня
+    return d >= todayStart;
+  }, { message: "Нельзя выбрать дату в прошлом" }),
   timeSlot: z.string().optional(),
   comment: z.string().optional(),
 });
@@ -70,6 +70,8 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
     { enabled: !!clinicId }
   );
   const createAppointment = useCreateAppointment();
+
+  const today = useMemo(() => startOfDay(new Date()), []);
 
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentSchema),
@@ -135,8 +137,6 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
       toast.error("Не удалось создать запись.");
     }
   };
-
-  const today = startOfDay(new Date());
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-2xl">
