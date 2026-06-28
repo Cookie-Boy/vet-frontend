@@ -42,7 +42,10 @@ const speciesLabels: Record<string, string> = {
 const appointmentSchema = z.object({
   petId: z.string().min(1, "Выберите питомца"),
   doctorId: z.string().nullable(),
-  date: z.date(),
+  date: z.date().refine(
+    (date) => date >= startOfDay(new Date()),
+    { message: "Нельзя выбрать дату в прошлом" }
+  ),
   timeSlot: z.string().optional(),
   comment: z.string().optional(),
 });
@@ -129,7 +132,7 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
       router.push("/appointments");
     } catch (error) {
       console.error("Appointment creation error:", error);
-      toast.error("Не удалось создать запись. Попробуйте другое время.");
+      toast.error("Не удалось создать запись.");
     }
   };
 
@@ -252,7 +255,8 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
                     form.setValue("timeSlot", "");
                     setSelectedDate(d);
                   }}
-                  disabled={(d) => d < today || d.getDay() === 0 || d.getDay() === 6}
+                  disabled={(d) => d.getDay() === 0 || d.getDay() === 6}
+                  fromDate={today}
                   initialFocus
                 />
               </PopoverContent>
