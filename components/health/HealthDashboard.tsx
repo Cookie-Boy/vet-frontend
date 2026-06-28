@@ -13,6 +13,12 @@ interface HealthDashboardProps {
   pets: PetResponse[];
 }
 
+const breedLabels: Record<string, string> = {
+  persian: "Персидская", siamese: "Сиамская", maine_coon: "Мейн-кун",
+  british: "Британская", labrador: "Лабрадор", german_shepherd: "Немецкая овчарка",
+  bulldog: "Бульдог", poodle: "Пудель",
+};
+
 export function HealthDashboard({ pets }: HealthDashboardProps) {
   const [selectedPetId, setSelectedPetId] = useState<string>(pets[0]?.id || "");
   const selectedPet = pets.find(p => p.id === selectedPetId);
@@ -29,7 +35,7 @@ export function HealthDashboard({ pets }: HealthDashboardProps) {
           <SelectContent>
             {pets.map((pet) => (
               <SelectItem key={pet.id} value={pet.id}>
-                {pet.name} ({pet.breed})
+                {pet.name} ({breedLabels[pet.breed] || pet.breed})
               </SelectItem>
             ))}
           </SelectContent>
