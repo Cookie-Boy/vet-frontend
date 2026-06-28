@@ -1,13 +1,14 @@
 // hooks/useReviews.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { reviewsApi } from "@/lib/api/reviews";
-import { CreateReviewRequest } from "@/types/doctor";
+import { CreateReviewRequest, Review } from "@/types/doctor";
 
-export const useReviews = (doctorId: string) => {
+export const useReviews = (doctorId: string, initialData?: Review[]) => {
   return useQuery({
     queryKey: ["reviews", doctorId],
     queryFn: () => reviewsApi.client.getByDoctorId(doctorId),
-    enabled: !!doctorId,
+    initialData,
+    enabled: true,
   });
 };
 

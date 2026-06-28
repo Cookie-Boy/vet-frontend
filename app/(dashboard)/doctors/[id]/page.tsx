@@ -11,6 +11,7 @@ import { Calendar, Mail, Phone, Stethoscope, Star, ArrowLeft, Building2 } from "
 import Link from "next/link";
 import { ReviewForm } from "@/components/doctors/ReviewForm";
 import { getSpecializationLabel } from "@/types/doctor";
+import { ReviewsSection } from "@/components/doctors/ReviewsSection";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -88,46 +89,8 @@ export default async function DoctorDetailPage({ params }: PageProps) {
             </Card>
           )}
         </TabsContent>
-        <TabsContent value="reviews" className="space-y-6 pt-4">
-          <ReviewForm doctorId={id} />
-          {reviews.length === 0 ? (
-            <Card>
-              <CardContent className="text-center text-muted-foreground py-8">
-                <Star className="mx-auto h-8 w-8 mb-2" />
-                <p>Пока нет отзывов. Будьте первым!</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {reviews.map((review) => (
-                <Card key={review.id}>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-base">{review.authorName}</CardTitle>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(review.createdAt).toLocaleDateString("ru-RU")}
-                        </p>
-                      </div>
-                      <div className="flex">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 ${
-                              i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="whitespace-pre-wrap">{review.comment}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+        <TabsContent value="reviews" className="pt-4">
+          <ReviewsSection doctorId={id} initialReviews={reviews} />
         </TabsContent>
       </Tabs>
     </div>
