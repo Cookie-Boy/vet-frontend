@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Mail, Phone, Stethoscope, Star, ArrowLeft, Building2 } from "lucide-react";
 import Link from "next/link";
 import { ReviewForm } from "@/components/doctors/ReviewForm";
+import { getSpecializationLabel } from "@/types/doctor";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -42,7 +43,7 @@ export default async function DoctorDetailPage({ params }: PageProps) {
           <h1 className="text-3xl font-bold">{fullName}</h1>
           <p className="text-muted-foreground flex items-center mt-1">
             <Stethoscope className="mr-1 h-4 w-4" />
-            {doctor.specialization}
+            {getSpecializationLabel(doctor.specialization)}
           </p>
           {doctor.clinicName && (
             <div className="flex items-center">
