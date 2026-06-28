@@ -1,4 +1,5 @@
 export interface AppointmentRequest {
+  clinicId: string;
   doctorId: string;
   ownerId: string;
   petId: string;
@@ -9,6 +10,8 @@ export interface AppointmentRequest {
 
 export interface AppointmentResponse {
   id: string;
+  clinicId: string;
+  clinicName: string;
   doctorId: string;
   doctorFullName?: string;
   ownerId: string;

@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, User, PawPrint, XCircle, CheckCircle, Trash2, Plus } from "lucide-react";
+import { Calendar, Clock, User, PawPrint, XCircle, CheckCircle, Trash2, Building2, Plus } from "lucide-react";
 import { AppointmentResponse } from "@/types/appointment";
 import { useCancelAppointment } from "@/hooks/useAppointments";
 import { toast } from "sonner";
@@ -16,7 +16,6 @@ import { CompleteAppointmentDialog } from "./CompleteAppointmentDialog";
 import { AppointmentFilters } from "./AppointmentFilters";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { toZonedTime } from 'date-fns-tz';
 
 interface AppointmentListProps {
   appointments: AppointmentResponse[];
@@ -38,13 +37,12 @@ export function AppointmentList({ appointments, userRole, userId }: AppointmentL
 
   const now = new Date();
 
-  // Фильтрация для админа
   const filteredAppointments = isAdmin
     ? appointments.filter((a) => {
-      const matchesDoctor = filterDoctorId === "all" || a.doctorId === filterDoctorId;
-      const matchesOwner = filterOwnerId === "all" || a.ownerId === filterOwnerId;
-      return matchesDoctor && matchesOwner;
-    })
+        const matchesDoctor = filterDoctorId === "all" || a.doctorId === filterDoctorId;
+        const matchesOwner = filterOwnerId === "all" || a.ownerId === filterOwnerId;
+        return matchesDoctor && matchesOwner;
+      })
     : appointments;
 
   const upcoming = filteredAppointments.filter(
@@ -66,85 +64,78 @@ export function AppointmentList({ appointments, userRole, userId }: AppointmentL
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "PENDING":
-        return <Badge variant="default">Ожидается</Badge>;
-      case "CANCELLED":
-        return <Badge variant="destructive">Отменена</Badge>;
-      case "COMPLETED":
-        return <Badge variant="secondary">Завершена</Badge>;
-      default:
-        return null;
+      case "PENDING": return <Badge variant="default">Ожидается</Badge>;
+      case "CANCELLED": return <Badge variant="destructive">Отменена</Badge>;
+      case "COMPLETED": return <Badge variant="secondary">Завершена</Badge>;
+      default: return null;
     }
   };
 
-  const renderAppointmentCard = (appointment: AppointmentResponse) => {
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const startZoned = toZonedTime(appointment.startTime, timezone);
-    const endZoned = toZonedTime(appointment.endTime, timezone);
-
-    return (
-      <Card key={appointment.id} className="mb-4">
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">
-              {format(startZoned, "d MMMM yyyy", { locale: ru })}
-            </CardTitle>
-            {getStatusBadge(appointment.status)}
+  const renderAppointmentCard = (appointment: AppointmentResponse) => (
+    <Card key={appointment.id} className="mb-4">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">
+            {format(new Date(appointment.startTime), "d MMMM yyyy", { locale: ru })}
+          </CardTitle>
+          {getStatusBadge(appointment.status)}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-2 text-sm">
+          <div className="flex items-center">
+            <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+            {format(new Date(appointment.startTime), "HH:mm")} –{" "}
+            {format(new Date(appointment.endTime), "HH:mm")}
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-2 text-sm">
-            <div className="flex items-center">
-              <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
-              {format(startZoned, "HH:mm")} –{" "}
-              {format(endZoned, "HH:mm")}
-            </div>
-            {(isDoctor || isAdmin) && (
-              <div className="flex items-center">
-                <User className="mr-2 h-4 w-4 text-muted-foreground" />
-                Владелец: {appointment.ownerFullName || "Не указан"}
-              </div>
-            )}
+          {(isDoctor || isAdmin) && (
             <div className="flex items-center">
               <User className="mr-2 h-4 w-4 text-muted-foreground" />
-              Врач: {appointment.doctorFullName || "Не назначен"}
+              Владелец: {appointment.ownerFullName || "Не указан"}
             </div>
-            {appointment.petFullName && (
-              <div className="flex items-center">
-                <PawPrint className="mr-2 h-4 w-4 text-muted-foreground" />
-                Питомец: {appointment.petFullName}
-              </div>
-            )}
-            {appointment.metadata?.comment && (
-              <p className="text-muted-foreground mt-2 italic">
-                "{appointment.metadata.comment}"
-              </p>
-            )}
+          )}
+          <div className="flex items-center">
+            <User className="mr-2 h-4 w-4 text-muted-foreground" />
+            Врач: {appointment.doctorFullName || "Не назначен"}
           </div>
-          <div className="mt-4 flex justify-end gap-2">
-            {isOwner && appointment.status === "PENDING" && (
-              <Button variant="outline" size="sm" onClick={() => handleCancel(appointment.id)}>
-                <XCircle className="mr-2 h-4 w-4" />
-                Отменить
-              </Button>
-            )}
-            {isDoctor && appointment.status === "PENDING" && (
-              <Button variant="default" size="sm" onClick={() => setCompletingAppointment(appointment)}>
-                <CheckCircle className="mr-2 h-4 w-4" />
-                Завершить приём
-              </Button>
-            )}
-            {isAdmin && (
-              <Button variant="destructive" size="sm" onClick={() => handleCancel(appointment.id)}>
-                <Trash2 className="mr-2 h-4 w-4" />
-                Удалить
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+          {appointment.petFullName && (
+            <div className="flex items-center">
+              <PawPrint className="mr-2 h-4 w-4 text-muted-foreground" />
+              Питомец: {appointment.petFullName}
+            </div>
+          )}
+          {appointment.clinicName && (
+            <div className="flex items-center">
+              <Building2 className="mr-2 h-4 w-4 text-muted-foreground" />
+              Клиника: {appointment.clinicName}
+            </div>
+          )}
+          {appointment.metadata?.comment && (
+            <p className="text-muted-foreground mt-2 italic">
+              "{appointment.metadata.comment}"
+            </p>
+          )}
+        </div>
+        <div className="mt-4 flex justify-end gap-2">
+          {isOwner && appointment.status === "PENDING" && (
+            <Button variant="outline" size="sm" onClick={() => handleCancel(appointment.id)}>
+              <XCircle className="mr-2 h-4 w-4" /> Отменить
+            </Button>
+          )}
+          {isDoctor && appointment.status === "PENDING" && (
+            <Button variant="default" size="sm" onClick={() => setCompletingAppointment(appointment)}>
+              <CheckCircle className="mr-2 h-4 w-4" /> Завершить приём
+            </Button>
+          )}
+          {isAdmin && (
+            <Button variant="destructive" size="sm" onClick={() => handleCancel(appointment.id)}>
+              <Trash2 className="mr-2 h-4 w-4" /> Удалить
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <>
@@ -157,15 +148,14 @@ export function AppointmentList({ appointments, userRole, userId }: AppointmentL
             {isDoctor
               ? "Пациенты, записанные к вам"
               : isAdmin
-                ? "Управление всеми записями клиники"
-                : "Управляйте вашими визитами к ветеринарам"}
+              ? "Управление всеми записями клиники"
+              : "Управляйте вашими визитами к ветеринарам"}
           </p>
         </div>
         {isOwner && (
           <Link href="/appointments/new">
             <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Записаться
+                <Plus className="mr-2 h-4 w-4" /> Записаться
             </Button>
           </Link>
         )}
@@ -187,18 +177,14 @@ export function AppointmentList({ appointments, userRole, userId }: AppointmentL
         </TabsList>
         <TabsContent value="upcoming" className="pt-4">
           {upcoming.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              Нет предстоящих записей
-            </p>
+            <p className="text-center text-muted-foreground py-8">Нет предстоящих записей</p>
           ) : (
             upcoming.map(renderAppointmentCard)
           )}
         </TabsContent>
         <TabsContent value="past" className="pt-4">
           {past.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              История записей пуста
-            </p>
+            <p className="text-center text-muted-foreground py-8">История записей пуста</p>
           ) : (
             past.map(renderAppointmentCard)
           )}
