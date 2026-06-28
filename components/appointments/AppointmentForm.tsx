@@ -1,10 +1,11 @@
+// components/appointments/AppointmentForm.tsx
 "use client";
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { ru } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 
@@ -24,6 +25,19 @@ import { UUID } from "crypto";
 import { useClinics } from "@/hooks/useClinics";
 import { useDoctorsByClinic } from "@/hooks/useDoctors";
 import { fromZonedTime } from 'date-fns-tz';
+import { getSpecializationLabel } from "@/types/doctor";
+
+// Русские названия пород и видов
+const breedLabels: Record<string, string> = {
+  persian: "Персидская", siamese: "Сиамская", maine_coon: "Мейн-кун",
+  british: "Британская", labrador: "Лабрадор", german_shepherd: "Немецкая овчарка",
+  bulldog: "Бульдог", poodle: "Пудель",
+};
+
+const speciesLabels: Record<string, string> = {
+  cat: "Кошка",
+  dog: "Собака",
+};
 
 const appointmentSchema = z.object({
   petId: z.string().min(1, "Выберите питомца"),
@@ -44,13 +58,13 @@ interface AppointmentFormProps {
 export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: AppointmentFormProps) {
   const router = useRouter();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [selectedClinicId, setSelectedClinicId] = useState<string | null>("all");
+  const [selectedClinicId, setSelectedClinicId] = useState<string | undefined>(undefined);
 
   const { data: clinics } = useClinics();
-  const clinicId = selectedClinicId === "all" ? null : selectedClinicId;
+  const clinicId = selectedClinicId ? selectedClinicId : null;
   const { data: doctors } = useDoctorsByClinic(
     clinicId,
-    { enabled: !!clinicId } // загружаем только если выбрана конкретная клиника
+    { enabled: !!clinicId }
   );
   const createAppointment = useCreateAppointment();
 
@@ -70,6 +84,8 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
   const selectedPet = pets.find(p => p.id === selectedPetId);
   const selectedDoctor = doctors?.find(d => d.id === selectedDoctorId);
 
+  const selectedClinic = clinics?.find(c => c.id === selectedClinicId);
+
   const doctorIdForSlots = selectedDoctorId === "any" ? null : selectedDoctorId;
   const date = form.watch("date");
   const { data: correctSlots, isLoading: slotsLoading } = useAvailableSlots(
@@ -78,8 +94,6 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
   );
 
   const onSubmit = async (values: AppointmentFormValues) => {
-    console.log("Form values:", values);
-
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     let startUTC = null;
     let endUTC = null;
@@ -101,7 +115,7 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
       petId: values.petId,
       startTime: startUTC,
       endTime: endUTC,
-      clinicId: selectedClinicId === "all" ? null : selectedClinicId,
+      clinicId: selectedClinicId || null,
       metadata: {
         comment: values.comment,
         petName: selectedPetObj?.name,
@@ -119,6 +133,8 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
     }
   };
 
+  const today = startOfDay(new Date());
+
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-2xl">
       <Card>
@@ -131,12 +147,14 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
             value={selectedPetId}
           >
             <SelectTrigger>
-              {selectedPet ? selectedPet.name : "Выберите питомца"}
+              {selectedPet
+                ? `${selectedPet.name} (${speciesLabels[selectedPet.species] || selectedPet.species}, ${breedLabels[selectedPet.breed] || selectedPet.breed})`
+                : "Выберите питомца"}
             </SelectTrigger>
             <SelectContent>
               {pets.map((pet) => (
                 <SelectItem key={pet.id} value={pet.id}>
-                  {pet.name} ({pet.species}, {pet.breed})
+                  {pet.name} ({speciesLabels[pet.species] || pet.species}, {breedLabels[pet.breed] || pet.breed})
                 </SelectItem>
               ))}
             </SelectContent>
@@ -152,16 +170,19 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
           <CardTitle>Выберите клинику</CardTitle>
         </CardHeader>
         <CardContent>
-          <Select value={selectedClinicId} onValueChange={setSelectedClinicId}></Select>
-          <Select value={selectedClinicId} onValueChange={(val) => {
-            setSelectedClinicId(val);
-            form.setValue("doctorId", null); // сброс врача при смене клиники
-          }}>
+          <Select
+            value={selectedClinicId || ""}
+            onValueChange={(val) => {
+              setSelectedClinicId(val || undefined);
+              form.setValue("doctorId", null);
+            }}
+          >
             <SelectTrigger>
-              <SelectValue placeholder="Выберите клинику" />
+              <SelectValue placeholder="Выберите клинику">
+                {selectedClinic ? selectedClinic.name : "Выберите клинику"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Все клиники</SelectItem>
               {clinics?.map((clinic) => (
                 <SelectItem key={clinic.id} value={clinic.id}>{clinic.name}</SelectItem>
               ))}
@@ -193,7 +214,7 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
                 <SelectItem value="any">Любой врач</SelectItem>
                 {doctors?.map((doc) => (
                   <SelectItem key={doc.id} value={doc.id}>
-                    {doc.lastName} {doc.firstName} – {doc.specialization}
+                    {doc.lastName} {doc.firstName} – {getSpecializationLabel(doc.specialization)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -231,7 +252,7 @@ export function AppointmentForm({ ownerId, pets, preselectedDoctorId }: Appointm
                     form.setValue("timeSlot", "");
                     setSelectedDate(d);
                   }}
-                  disabled={(d) => d < new Date() || d.getDay() === 0 || d.getDay() === 6}
+                  disabled={(d) => d < today || d.getDay() === 0 || d.getDay() === 6}
                   initialFocus
                 />
               </PopoverContent>
