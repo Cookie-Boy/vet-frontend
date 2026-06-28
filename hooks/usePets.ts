@@ -39,3 +39,13 @@ export const useUpdatePet = (petId: string) => {
     },
   });
 };
+
+export const useDeletePet = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (petId: string) => petsApi.client.deletePet(petId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pets"] });
+    },
+  });
+};

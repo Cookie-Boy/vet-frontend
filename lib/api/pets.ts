@@ -32,6 +32,10 @@ export const petsApi = {
     return response.data;
   },
 
+  deletePet: async (petId: string): Promise<void> => {
+    await apiClient.delete(`/api/profile/pets/${petId}`);
+  },
+
   getPetQrCodeUrl: (petId: string, width: number = 300, height: number = 300): string => {
   return `/api/profile/pets/${petId}/qrcode?width=${width}&height=${height}`;
 },
