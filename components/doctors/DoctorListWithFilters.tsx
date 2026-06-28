@@ -14,8 +14,13 @@ interface DoctorListWithFiltersProps {
 }
 
 export function DoctorListWithFilters({ clinics, isAdmin }: DoctorListWithFiltersProps) {
-  const [selectedClinicId, setSelectedClinicId] = useState<string | null>(null);
-  const { data: doctors, isLoading } = useDoctorsByClinic(selectedClinicId === "all" ? null : selectedClinicId);
+  // Начальное значение "all" — сразу показываем всех врачей
+  const [selectedClinicId, setSelectedClinicId] = useState<string | null>("all");
+
+  const { data: doctors, isLoading } = useDoctorsByClinic(
+    selectedClinicId === "all" ? null : selectedClinicId
+  );
+
   const selectedClinic = clinics.find(c => c.id === selectedClinicId);
 
   return (
@@ -23,15 +28,15 @@ export function DoctorListWithFilters({ clinics, isAdmin }: DoctorListWithFilter
       <div className="mb-4 w-64">
         <Label>Фильтр по клинике</Label>
         <Select value={selectedClinicId} onValueChange={setSelectedClinicId}>
-          <SelectTrigger className="w-64">
+          <SelectTrigger>
             <SelectValue>
-                {selectedClinic ? selectedClinic.name : "Все клиники"}
+              {selectedClinic ? selectedClinic.name : "Все клиники"}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Все клиники</SelectItem>
             {clinics.map((clinic) => (
-              <SelectItem key={clinic.id} value={String(clinic.id)}>
+              <SelectItem key={clinic.id} value={clinic.id}>
                 {clinic.name}
               </SelectItem>
             ))}
