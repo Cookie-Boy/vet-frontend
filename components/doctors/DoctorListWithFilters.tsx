@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { useDoctorsByClinic } from "@/hooks/useDoctors";
+import { useDoctors, useDoctorsByClinic } from "@/hooks/useDoctors";
 import { DoctorCard } from "./DoctorCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -14,12 +14,23 @@ interface DoctorListWithFiltersProps {
 }
 
 export function DoctorListWithFilters({ clinics, isAdmin }: DoctorListWithFiltersProps) {
-  // Начальное значение "all" — сразу показываем всех врачей
-  const [selectedClinicId, setSelectedClinicId] = useState<string | null>("all");
+  const [selectedClinicId, setSelectedClinicId] = useState<string>("all");
 
-  const { data: doctors, isLoading } = useDoctorsByClinic(
-    selectedClinicId === "all" ? null : selectedClinicId
+  // Явно указываем тип параметра как string | null и преобразуем null в "all"
+  const handleClinicChange = (value: string | null) => {
+    setSelectedClinicId(value ?? "all");
+  };
+
+  // Загружаем всех врачей при "all", иначе врачей конкретной клиники
+  const allDoctorsQuery = useDoctors();
+  const clinicDoctorsQuery = useDoctorsByClinic(
+    selectedClinicId !== "all" ? selectedClinicId : null
   );
+
+  const isLoading =
+    selectedClinicId === "all" ? allDoctorsQuery.isLoading : clinicDoctorsQuery.isLoading;
+  const doctors =
+    selectedClinicId === "all" ? allDoctorsQuery.data : clinicDoctorsQuery.data;
 
   const selectedClinic = clinics.find(c => c.id === selectedClinicId);
 
@@ -27,7 +38,7 @@ export function DoctorListWithFilters({ clinics, isAdmin }: DoctorListWithFilter
     <>
       <div className="mb-4 w-64">
         <Label>Фильтр по клинике</Label>
-        <Select value={selectedClinicId} onValueChange={setSelectedClinicId}>
+        <Select value={selectedClinicId} onValueChange={handleClinicChange}>
           <SelectTrigger>
             <SelectValue>
               {selectedClinic ? selectedClinic.name : "Все клиники"}
@@ -52,7 +63,11 @@ export function DoctorListWithFilters({ clinics, isAdmin }: DoctorListWithFilter
           ))}
         </div>
       ) : (
-        <div className="text-center text-muted-foreground">Нет врачей в выбранной клинике</div>
+        <div className="text-center text-muted-foreground">
+          {selectedClinicId === "all"
+            ? "Нет доступных врачей"
+            : "Нет врачей в выбранной клинике"}
+        </div>
       )}
     </>
   );

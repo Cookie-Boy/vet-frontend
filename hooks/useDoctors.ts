@@ -58,13 +58,12 @@ export const useDoctorsByClinic = (
     queryKey: ["doctors", clinicId],
     queryFn: async () => {
       if (!clinicId) {
-        // Если clinicId нет, возвращаем пустой массив (но запрос не выполнится из-за enabled)
         return [];
       }
       const response = await apiClient.get(`/api/management/doctors/clinic/${clinicId}`);
       return response.data;
     },
-    enabled: !!clinicId, // запрос выполняется только когда clinicId не null/undefined
+    enabled: !!clinicId,
     ...options,
   });
 };

@@ -63,7 +63,7 @@ export function PetCard({ pet }: PetCardProps) {
         </CardContent>
         <CardFooter className="mt-auto flex gap-2">
           <Button variant="outline" size="sm" className="flex-1">
-            <Link href={`/pets/${pet.id}`}><Eye className="mr-2 h-4 w-4" />Подробнее</Link>
+            <Link href={`/pets/${pet.id}`}>Подробнее</Link>
           </Button>
           <Button variant="destructive" size="icon" onClick={() => setShowDelete(true)}>
             <Trash2 className="h-4 w-4" />
